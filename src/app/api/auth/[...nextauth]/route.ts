@@ -1,4 +1,5 @@
-import { default as NextAuthHandler } from "next-auth";
+// src/app/api/auth/[...nextauth]/route.ts
+import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
@@ -24,6 +25,6 @@ export const authOptions = {
   },
 };
 
-const handler = NextAuthHandler(authOptions);
-
+// ✅ For App Router: export GET and POST handlers
+const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };
