@@ -1,15 +1,12 @@
 "use client";
 
 import { getProviders, signIn, ClientSafeProvider, LiteralUnion } from "next-auth/react";
-import { BuiltInProviderType } from "next-auth/providers";
 import { useEffect, useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
 
 export default function SignInPage() {
-  const [providers, setProviders] = useState<
-    Record<LiteralUnion<BuiltInProviderType, string>, ClientSafeProvider> | null
-  >(null);
+  const [providers, setProviders] = useState<Record<string, ClientSafeProvider> | null>(null);
 
   useEffect(() => {
     getProviders().then((res) => setProviders(res));
@@ -25,16 +22,18 @@ export default function SignInPage() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen gap-6 px-4 bg-gray-50 dark:bg-gray-900">
-      <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Sign in</h1>
+      <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Sign in</h1>
       <div className="flex flex-col gap-3 w-full max-w-sm">
-        {Object.values(providers).map((provider) => (
+        {Object.values(providers).map((provider: ClientSafeProvider) => (
           <button
             key={provider.name}
-            onClick={() => signIn(provider.id, { callbackUrl: "/profile" })}
-            className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+            onClick={() =>
+              signIn(provider.id as LiteralUnion<string>, { callbackUrl: "/profile" })
+            }
+            className="w-full flex items-center justify-center gap-3 px-4 py-3 border rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"
           >
             {getProviderIcon(provider.name)}
-            <span className="text-gray-900 dark:text-gray-100">Continue with {provider.name}</span>
+            Continue with {provider.name}
           </button>
         ))}
       </div>
