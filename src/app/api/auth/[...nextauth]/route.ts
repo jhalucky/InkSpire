@@ -1,12 +1,11 @@
-// Correct for NextAuth v4
-import NextAuth, { Session } from "next-auth";
+import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import { prisma } from "@/lib/prisma"; // <-- always defined
 
-// Then define your auth options like this:
 export const authOptions = {
-  adapter: PrismaAdapter(prisma),
+  adapter: PrismaAdapter(prisma), // now prisma is never undefined
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -20,15 +19,7 @@ export const authOptions = {
   session: {
     strategy: "jwt",
   },
-  callbacks: {
-    async session({ session, user }) {
-      session.user.id = user.id; // add custom fields if needed
-      return session;
-    },
-  },
 };
 
 export default NextAuth(authOptions);
-
-export { handler as GET, handler as POST };
 
