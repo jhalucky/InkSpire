@@ -1,6 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
+import Image from 'next/image';
 
 export default function HomePage() {
   const { data: session } = useSession();
@@ -11,7 +12,7 @@ export default function HomePage() {
         <div>
           <h1>Welcome, {session.user.name}</h1>
           <p>Email: {session.user.email}</p>
-          <img
+          <Image
             src={session.user.image ?? "/default-avatar.png"}
             alt="profile"
             className="w-16 h-16 rounded-full"
