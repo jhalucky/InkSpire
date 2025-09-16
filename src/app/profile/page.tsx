@@ -5,17 +5,22 @@ import Image from "next/image";
 import { redirect } from "next/navigation";
 
 export default async function ProfilePage() {
+  // Get the session
   const session = await getServerSession(authOptions);
 
-  if (!session) return redirect("/signin");
+  // If no session, redirect to signin
+  if (!session?.user?.email) return redirect("/signin");
 
-  // Check if email exists before querying
-  if (!session.user?.email) return redirect("/signin");
+  // Fetch the user from the database
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
+  });
 
-  const user = await prisma.user.findUnique({ where: { email: session.user.email } });
+  // If user not found, redirect to signin
+  if (!user) return redirect("/signin");
 
-  // Redirect to setup if user doesn't have a username yet
-  if (!user?.username) return redirect("/profile/setup");
+  // If user has no username yet, redirect to setup
+  if (!user.username) return redirect("/profile/setup");
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen gap-4 px-4">
@@ -30,13 +35,17 @@ export default async function ProfilePage() {
       )}
       <h1 className="text-2xl font-bold">{user.name}</h1>
       <p className="text-gray-500">@{user.username}</p>
-      <p>{user.bio}</p>
-      <p>
-        <strong>Profession:</strong> {user.profession}
-      </p>
-      <p>
-        <strong>Education:</strong> {user.education}
-      </p>
+      {user.bio && <p>{user.bio}</p>}
+      {user.profession && (
+        <p>
+          <strong>Profession:</strong> {user.profession}
+        </p>
+      )}
+      {user.education && (
+        <p>
+          <strong>Education:</strong> {user.education}
+        </p>
+      )}
     </div>
   );
 }
