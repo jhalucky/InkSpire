@@ -1,12 +1,12 @@
 // src/app/api/auth/[...nextauth]/route.ts
 import NextAuth from "next-auth";
-import { AuthOptions } from "next-auth"; // ✅ Add this import
+import type { NextAuthOptions } from "next-auth"; // ✅ Use NextAuthOptions instead
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 
-export const authOptions: AuthOptions = { // ✅ Add type annotation
+export const authOptions: NextAuthOptions = { // ✅ Use NextAuthOptions
   adapter: PrismaAdapter(prisma),
   providers: [
     GoogleProvider({
@@ -14,12 +14,12 @@ export const authOptions: AuthOptions = { // ✅ Add type annotation
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
     GitHubProvider({
-      clientId: process.env.GITHUB_CLIENT_ID!, // ✅ Fix: should be GITHUB_ID
-      clientSecret: process.env.GITHUB_CLIENT_SECRET!, // ✅ Fix: should be GITHUB_SECRET
+      clientId: process.env.GITHUB_ID!,
+      clientSecret: process.env.GITHUB_SECRET!,
     }),
   ],
   session: {
-    strategy: "jwt" as const, // ✅ Add 'as const' for proper typing
+    strategy: "jwt" as const,
   },
   pages: {
     signIn: "/auth/signin",
