@@ -1,4 +1,5 @@
-import NextAuth from "next-auth";
+import { NextAuthHandler } from "next-auth/next"; 
+import { NextRequest } from "next/server";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
@@ -23,7 +24,7 @@ export const authOptions = {
 };
 
 // NextAuth expects a handler function in App Router
-const handler = NextAuth(authOptions);
+const handler = (req: NextRequest) => NextAuthHandler(req, authOptions);
 
 // Export GET/POST for App Router
 export { handler as GET, handler as POST };
