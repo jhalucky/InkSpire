@@ -1,4 +1,4 @@
-import { NextAuthHandler } from "next-auth/next"; 
+import { NextAuthHandler } from "next-auth/core"; 
 import { NextRequest } from "next/server";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
