@@ -1,12 +1,12 @@
 // src/app/api/auth/[...nextauth]/route.ts
 import NextAuth from "next-auth";
-import type { NextAuthOptions } from "next-auth"; // ✅ Use NextAuthOptions instead
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 
-export const authOptions: NextAuthOptions = { // ✅ Use NextAuthOptions
+// ✅ Remove all type annotations - just plain object
+export const authOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     GoogleProvider({
@@ -19,7 +19,7 @@ export const authOptions: NextAuthOptions = { // ✅ Use NextAuthOptions
     }),
   ],
   session: {
-    strategy: "jwt" as const,
+    strategy: "jwt",
   },
   pages: {
     signIn: "/auth/signin",
