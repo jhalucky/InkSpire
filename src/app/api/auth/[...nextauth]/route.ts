@@ -2,10 +2,11 @@ import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import { prisma } from "@/lib/prisma"; // <-- always defined
+import { prisma } from "@/lib/prisma";
 
+// Define your NextAuth options
 export const authOptions = {
-  adapter: PrismaAdapter(prisma), // now prisma is never undefined
+  adapter: PrismaAdapter(prisma),
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -21,5 +22,9 @@ export const authOptions = {
   },
 };
 
-export default NextAuth(authOptions);
+// NextAuth expects a handler function in App Router
+const handler = NextAuth(authOptions);
+
+// Export GET/POST for App Router
+export { handler as GET, handler as POST };
 
