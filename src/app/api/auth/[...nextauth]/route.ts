@@ -5,8 +5,7 @@ import GitHubProvider from "next-auth/providers/github";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 
-// ✅ Remove all type annotations - just plain object
-export const authOptions = {
+const authOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     GoogleProvider({
@@ -26,5 +25,6 @@ export const authOptions = {
   },
 };
 
-const handler = NextAuth(authOptions);
-export { handler as GET, handler as POST };
+// ✅ Try this syntax instead
+export const { handlers, auth, signIn, signOut } = NextAuth(authOptions);
+export const { GET, POST } = handlers;
