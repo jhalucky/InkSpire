@@ -1,11 +1,8 @@
-// src/lib/auth.ts
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import { PrismaClient, User } from "@prisma/client";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
-import type { NextAuthOptions, Session } from "next-auth";
-
-const prisma = new PrismaClient();
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import { prisma } from "./prisma";
+import { NextAuthOptions } from "next-auth";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -19,26 +16,10 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GITHUB_SECRET!,
     }),
   ],
-  secret: process.env.NEXTAUTH_SECRET,
-  session: {
-    strategy: "jwt",
-  },
   callbacks: {
-    async session({ session, token }) {
-      // ✅ Explicitly type session.user
-      if (session.user) {
-        session.user.id = token.sub as string;
-      }
+    async session({ session, user }) {
+      if (session.user) session.user.id = user.id;
       return session;
-    },
-    async signIn({ user }) {
-      if (!user.email) return false;
-
-      const existingUser = await prisma.user.findUnique({
-        where: { email: user.email },
-      });
-
-      return existingUser ? true : true; // allow creation if not exists
     },
   },
 };
