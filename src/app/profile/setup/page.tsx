@@ -1,75 +1,72 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function ProfileSetupPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [formData, setFormData] = useState({
-    name: "",
-    bio: "",
-  });
-  const [loading, setLoading] = useState(true);
+  const [username, setUsername] = useState("");
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (status === "loading") return;
-    if (!session?.user?.email) {
+
+    if (!session) {
       router.push("/signin");
-    } else {
-      setFormData({ name: session.user.name || "", bio: "" });
-      setLoading(false);
+    }
+
+    // If profile is already setup, redirect to profile
+    if (session?.user?.username) {
+      router.push("/profile");
     }
   }, [session, status, router]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!username) return;
 
-    // Save profile via API route
-    await fetch("/api/profile/setup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData),
-    });
+    setSaving(true);
+    try {
+      const res = await fetch("/api/profile/setup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username }),
+      });
 
-    router.push("/profile"); // redirect to profile
+      if (res.ok) {
+        router.push("/profile");
+      } else {
+        alert("Failed to save profile");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong");
+    } finally {
+      setSaving(false);
+    }
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (status === "loading") return <p>Loading...</p>;
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6">
-      <h1 className="text-3xl font-bold mb-6">Set Up Your Profile</h1>
-      <form
-        onSubmit={handleSubmit}
-        className="flex flex-col gap-4 w-full max-w-md"
-      >
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-50">
+      <h1 className="text-2xl font-bold mb-4">Complete Your Profile</h1>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3 w-80">
         <input
           type="text"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          placeholder="Full Name"
-          className="p-2 border rounded"
-          required
-        />
-        <textarea
-          name="bio"
-          value={formData.bio}
-          onChange={handleChange}
-          placeholder="Short Bio"
-          className="p-2 border rounded"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          className="p-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
         />
         <button
           type="submit"
-          className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
+          disabled={saving}
+          className="bg-blue-600 text-white p-2 rounded disabled:opacity-50"
         >
-          Save Profile
+          {saving ? "Saving..." : "Continue"}
         </button>
       </form>
     </div>
