@@ -17,7 +17,6 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    // Include additional info in the session
     async session({ session, user }) {
       if (session.user) {
         session.user.id = user.id;
@@ -30,11 +29,13 @@ export const authOptions: NextAuthOptions = {
     async signIn({ user, account }) {
       if (!account) return true;
 
+      // Check if user already exists in DB
       const existingUser = await prisma.user.findUnique({
-        where: { email: user.email },
+        where: { email: user.email! },
       });
 
       if (existingUser) {
+        // If account with this provider doesn’t exist, create it
         const existingAccount = await prisma.account.findUnique({
           where: {
             provider_providerAccountId: {
@@ -58,9 +59,16 @@ export const authOptions: NextAuthOptions = {
             },
           });
         }
+
+        // Redirect existing user to /profile
+        return "/profile";
       }
 
+      // New user: allow sign-in and redirect to setup
       return true;
     },
+  },
+  pages: {
+    signIn: "/signin", // optional: custom sign-in page
   },
 };
