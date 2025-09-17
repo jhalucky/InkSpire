@@ -1,49 +1,29 @@
-import { NextAuthOptions } from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
-import GitHubProvider from "next-auth/providers/github";
-import { prisma } from "./prisma";
+import NextAuth from "next-auth";
+import Google from "next-auth/providers/google";
+import GitHub from "next-auth/providers/github";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import { prisma } from "@/lib/prisma";
 
-export const authOptions: NextAuthOptions = {
+// NextAuth configuration
+export const authConfig = {
+  adapter: PrismaAdapter(prisma),
   providers: [
-    GoogleProvider({
+    Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
-    GitHubProvider({
-      clientId: process.env.GITHUB_CLIENT_ID!,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+    GitHub({
+      clientId: process.env.GITHUB_ID!,
+      clientSecret: process.env.GITHUB_SECRET!,
     }),
   ],
-  secret: process.env.NEXTAUTH_SECRET,
+  session: {
+    strategy: "jwt", // or "database" if you prefer
+  },
   pages: {
-    signIn: "/auth/signin",
+    signIn: "/auth/signin", // optional
   },
-  callbacks: {
-    async session({ session, _user, token }) {
-      if (session.user) {
-        session.user.id = token.sub; // add user id
-      }
-      return session;
-    },
-  },
-  events: {
-    async signIn({ user }) {
-      if (!user.email) return;
+} satisfies NextAuth.Config;
 
-      // Check if user exists
-      const existingUser = await prisma.user.findUnique({
-        where: { email: user.email },
-      });
-
-      if (!existingUser) {
-        await prisma.user.create({
-          data: {
-            email: user.email,
-            name: user.name,
-            image: user.image,
-          },
-        });
-      }
-    },
-  },
-};
+// Create reusable auth helpers
+export const { handlers, signIn, signOut, auth } = NextAuth(authConfig);
