@@ -1,32 +1,43 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { redirect } from "next/navigation";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 
-export default async function ProfilePage() {
-  const session = await getServerSession(authOptions);
+export default function ProfilePage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
 
-  if (!session?.user?.email) {
-    return redirect("/signin");
-  }
+  useEffect(() => {
+    if (status === "loading") return; // wait for session
+    if (!session?.user?.email) {
+      router.push("/signin");
+    } else {
+      setLoading(false);
+    }
+  }, [session, status, router]);
+
+  if (loading) return <p>Loading...</p>;
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-50">
-      <h1 className="text-3xl font-bold mb-4">Your Profile</h1>
-      <Image
-        src={session.user.image ?? "/default-avatar.png"}
-        alt="Profile"
-        className="w-24 h-24 rounded-full mb-4"
-      />
-      <p className="text-lg mb-2">
-        <strong>Name:</strong> {session.user.name}
-      </p>
-      <p className="text-lg mb-2">
-        <strong>Email:</strong> {session.user.email}
-      </p>
-      <p className="text-lg">
-        <strong>User ID:</strong> {session.user.id}
-      </p>
+    <div className="min-h-screen flex flex-col items-center justify-center p-6">
+      <h1 className="text-3xl font-bold mb-4">Welcome, {session.user.name}</h1>
+      <p className="mb-4">Email: {session.user.email}</p>
+      {session.user.image && (
+        <Image
+          src={session.user.image}
+          alt="Profile"
+          className="w-32 h-32 rounded-full mb-4"
+        />
+      )}
+      <button
+        onClick={() => router.push("/profile/setup")}
+        className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+      >
+        Edit Profile
+      </button>
     </div>
   );
 }
