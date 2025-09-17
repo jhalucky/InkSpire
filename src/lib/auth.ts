@@ -1,29 +1,53 @@
-import NextAuth from "next-auth";
-import Google from "next-auth/providers/google";
-import GitHub from "next-auth/providers/github";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import { prisma } from "@/lib/prisma";
+import { PrismaClient } from "@prisma/client";
+import GoogleProvider from "next-auth/providers/google";
+import GitHubProvider from "next-auth/providers/github";
+import type { NextAuthOptions } from "next-auth";
 
-// NextAuth configuration
-export const authConfig = {
+const prisma = new PrismaClient();
+
+export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
-    Google({
+    GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
-    GitHub({
+    GitHubProvider({
       clientId: process.env.GITHUB_ID!,
       clientSecret: process.env.GITHUB_SECRET!,
     }),
   ],
+  secret: process.env.NEXTAUTH_SECRET,
   session: {
-    strategy: "jwt", // or "database" if you prefer
+    strategy: "jwt",
   },
-  pages: {
-    signIn: "/auth/signin", // optional
-  },
-} satisfies NextAuth.Config;
+  callbacks: {
+    // attach userId to session
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.sub;
+      }
+      return session;
+    },
 
-// Create reusable auth helpers
-export const { handlers, signIn, signOut, auth } = NextAuth(authConfig);
+    // prevent duplicate account creation
+    async signIn({ user, account }) {
+      if (!user.email) return false;
+
+      const existingUser = await prisma.user.findUnique({
+        where: { email: user.email },
+      });
+
+      if (existingUser) {
+        // ✅ user already exists → allow login
+        return true;
+      }
+
+      // ✅ otherwise let adapter create user
+      return true;
+    },
+  },
+};
+
+

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function ProfileSetupPage({ userId }: { userId: string }) {
+export default function ProfileSetupPage({ params }: { params?: any }) {
   const router = useRouter();
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
@@ -12,6 +12,9 @@ export default function ProfileSetupPage({ userId }: { userId: string }) {
   const [education, setEducation] = useState("");
   const [avatar, setAvatar] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // TODO: Replace with actual logged-in userId (from session)
+  const userId = "replace-with-session-user-id";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,3 +103,4 @@ export default function ProfileSetupPage({ userId }: { userId: string }) {
     </div>
   );
 }
+
