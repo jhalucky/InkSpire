@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
+import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth"; // Fixed import path
 import Image from "next/image";
 import { redirect } from "next/navigation";
