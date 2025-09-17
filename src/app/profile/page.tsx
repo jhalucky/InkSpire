@@ -1,50 +1,32 @@
-import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth"; // Fixed import path
-import Image from "next/image";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import Image from "next/image";
 
 export default async function ProfilePage() {
   const session = await getServerSession(authOptions);
 
-  // ✅ Fixed: Proper null checking without unsafe assertion
   if (!session?.user?.email) {
     return redirect("/signin");
   }
 
-  const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
-  });
-
-  if (!user) {
-    return redirect("/signin");
-  }
-
-  // Redirect to setup if user doesn't have a username
-  if (!user.username) {
-    return redirect("/profile/setup");
-  }
-
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen gap-4 px-4">
-      {user.avatar && (
-        <Image 
-          src={user.avatar} 
-          alt="Avatar" 
-          width={120} 
-          height={120} 
-          className="rounded-full" 
-        />
-      )}
-      <h1 className="text-2xl font-bold">{user.name}</h1>
-      <p className="text-gray-500">@{user.username}</p>
-      {user.bio && <p className="text-center max-w-md">{user.bio}</p>}
-      {user.profession && (
-        <p><strong>Profession:</strong> {user.profession}</p>
-      )}
-      {user.education && (
-        <p><strong>Education:</strong> {user.education}</p>
-      )}
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-50">
+      <h1 className="text-3xl font-bold mb-4">Your Profile</h1>
+      <Image
+        src={session.user.image ?? "/default-avatar.png"}
+        alt="Profile"
+        className="w-24 h-24 rounded-full mb-4"
+      />
+      <p className="text-lg mb-2">
+        <strong>Name:</strong> {session.user.name}
+      </p>
+      <p className="text-lg mb-2">
+        <strong>Email:</strong> {session.user.email}
+      </p>
+      <p className="text-lg">
+        <strong>User ID:</strong> {session.user.id}
+      </p>
     </div>
   );
 }
