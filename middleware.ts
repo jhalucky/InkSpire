@@ -1,4 +1,3 @@
-// middleware.ts
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 
@@ -6,7 +5,7 @@ export default withAuth(
   async function middleware(req) {
     const token = req.nextauth.token;
     const isProfileSetupRoute = req.nextUrl.pathname.startsWith("/profile/setup");
-
+    
     // If the user has a token but no username, redirect to profile setup
     if (token && !token.username && !isProfileSetupRoute) {
       return NextResponse.redirect(new URL("/profile/setup", req.url));
