@@ -2,7 +2,15 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ["lh3.googleusercontent.com"], // whitelist Google avatars
+    domains: ["lh3.googleusercontent.com"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "inkspire-yo.vercel.app",
+        port: "",
+        pathname: "/uploads/**",
+      },
+    ],
   },
 };
 

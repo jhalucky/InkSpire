@@ -10,22 +10,21 @@ generator client {
 }
 
 model User {
-  id            String   @id @default(cuid())
-  name          String?
-  email         String   @unique
-  emailVerified DateTime?
-  avatar        String?
-  username      String?
-  bio           String?
-  profession    String?
-  education     String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-
-  accounts Account[]
-  sessions Session[]
+  id        String   @id @default(cuid())
+  name      String?
+  email     String   @unique
+  username  String?  @unique
+  avatar    String?  // instead of `image`
+  bio       String?
+  profession String?
+  education String?
+  twitterUrl   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  accounts  Account[]
+  sessions  Session[]
 }
+
 
 model Account {
   id                String  @id @default(cuid())
