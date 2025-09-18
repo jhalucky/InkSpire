@@ -1,17 +1,17 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import Image from "next/image";
-import { Pencil, Save, XCircle } from "lucide-react"; // No need to import 'X' from lucide-react anymore for Twitter logo
+import { Pencil, Save, XCircle } from "lucide-react";
 
 // Utility function to extract Twitter username from URL
 function getTwitterUsernameFromUrl(url: string | null | undefined): string | null {
   if (!url) return null;
   try {
     const urlObject = new URL(url);
-    const pathSegments = urlObject.pathname.split('/');
-    const username = pathSegments.filter(segment => segment !== '')[0]; 
+    const pathSegments = urlObject.pathname.split("/");
+    const username = pathSegments.filter((segment) => segment !== "")[0];
     return username || null;
   } catch (error) {
     return null;
@@ -23,43 +23,45 @@ const generateAvatarBgColor = (name: string | null | undefined) => {
   const seed = name?.length ? name.charCodeAt(0) + name.charCodeAt(name.length - 1) : 0;
   const colors = [
     "bg-red-200", "bg-blue-200", "bg-green-200", "bg-yellow-200",
-    "bg-purple-200", "bg-pink-200", "bg-indigo-200", "bg-teal-200"
+    "bg-purple-200", "bg-pink-200", "bg-indigo-200", "bg-teal-200",
   ];
   return colors[seed % colors.length];
 };
 
 export default function ProfilePage() {
   const { data: session, update } = useSession();
-  const user = session?.user; 
+  const user = session?.user;
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [avatar, setAvatar] = useState(user?.image || "");
-  const [username, setUsername] = useState(user?.username || ""); 
-  const [bio, setBio] = useState(user?.bio || ""); 
-  const [profession, setProfession] = useState(user?.profession || "");
-  const [education, setEducation] = useState(user?.education || "");
-  const [twitterUrl, setTwitterUrl] = useState(user?.twitterUrl || "");
+  // Use a single state object to hold editable changes
+  const [editedProfile, setEditedProfile] = useState({
+    username: user?.username || "",
+    bio: user?.bio || "",
+    profession: user?.profession || "",
+    education: user?.education || "",
+    twitterUrl: user?.twitterUrl || "",
+  });
+
+  // Use useEffect to update the state when the user object changes
+  useEffect(() => {
+    if (user) {
+      setEditedProfile({
+        username: user.username || "",
+        bio: user.bio || "",
+        profession: user.profession || "",
+        education: user.education || "",
+        twitterUrl: user.twitterUrl || "",
+      });
+    }
+  }, [user]);
 
   const [loading, setLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [usernameError, setUsernameError] = useState<string | null>(null);
 
-  // Initialize state with user data when session changes
-//   useEffect(() => {
-//     if (user) {
-//       setAvatar(user.image || "");
-//       setUsername(user.username || "");
-//       setBio(user.bio || ""); 
-//       setProfession(user.profession || "");
-//       setEducation(user.education || "");
-//       setTwitterUrl(user.twitterUrl || "");
-//       console.log("Client-side (useEffect): Initializing/Resetting twitterUrl to:", user.twitterUrl); // DEBUG
-//     }
-//   }, [user]);
-
-  // Derived state for Twitter username display
-  const twitterHandle = useMemo(() => getTwitterUsernameFromUrl(twitterUrl), [twitterUrl]);
+  // Derived state for Twitter username display and avatar background
+  const twitterHandle = useMemo(() => getTwitterUsernameFromUrl(user?.twitterUrl), [user?.twitterUrl]);
   const defaultAvatarBg = useMemo(() => generateAvatarBgColor(user?.name), [user?.name]);
 
   // handle avatar upload
@@ -100,10 +102,9 @@ export default function ProfilePage() {
 
       const data = await res.json();
       if (res.ok) {
-        const newAvatarUrl = data.user.avatar; // Adjust based on actual response
-        setAvatar(newAvatarUrl);
-        console.log("New Avatar URL:", newAvatarUrl);
-        await update({ avatar: newAvatarUrl });
+        // Crucial: The `update` function refreshes the session
+        // The `useEffect` hook will then update the `editedProfile` state
+        await update({ ...session?.user, image: data.user.avatar });
       } else {
         alert(data.error || "Upload failed");
       }
@@ -123,9 +124,9 @@ export default function ProfilePage() {
     setIsSaving(true);
     setUsernameError(null);
 
-    const usernameRegex = /^[a-z0-9_]{3,20}$/; 
-    if (username && !usernameRegex.test(username)) {
-      setUsernameError("Username must be 3-20 characters, alphanumeric, lowercase, and can include underscores.");
+    const usernameRegex = /^[a-z0-9_]{3,20}$/;
+    if (editedProfile.username && !usernameRegex.test(editedProfile.username)) {
+      setUsernameError("Username must be 3-20 characters, lowercase, and can include underscores.");
       setIsSaving(false);
       return;
     }
@@ -136,16 +137,16 @@ export default function ProfilePage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ username, bio, twitterUrl, profession, education }),
+        body: JSON.stringify(editedProfile),
       });
 
       const data = await res.json();
-      console.log("Client-side (handleSaveProfile): API Response data:", data); // DEBUG
-
+      
       if (res.ok) {
         alert("Profile updated successfully!");
-        setIsEditing(false); // Exit edit mode
-        await update(data.user); // Update NextAuth session with the full user object from DB
+        setIsEditing(false);
+        // Crucial: Update the session with the new user object
+        await update(data.user);
       } else {
         if (data.error && data.error.includes("username already exists")) {
           setUsernameError(data.error);
@@ -186,15 +187,15 @@ export default function ProfilePage() {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-400"></div>
             </div>
           ) : (
-            avatar ? ( 
+            user.image ? (
               <Image
-                src={avatar}
+                src={user.image}
                 alt="Avatar"
                 width={120}
                 height={120}
                 className="rounded-full border-2 border-gray-600 object-cover transition-transform hover:scale-105"
               />
-            ) : ( 
+            ) : (
               <div className={`w-full h-full rounded-full border-2 border-gray-600 flex items-center justify-center text-5xl font-bold text-gray-800 ${defaultAvatarBg}`}>
                 {(user.name ? user.name[0] : "U").toUpperCase()}
               </div>
@@ -231,9 +232,9 @@ export default function ProfilePage() {
             <>
               <input
                 type="text"
-                value={username}
+                value={editedProfile.username}
                 onChange={(e) => {
-                  setUsername(e.target.value);
+                  setEditedProfile({...editedProfile, username: e.target.value});
                   setUsernameError(null);
                 }}
                 className={`mt-1 p-2 border ${usernameError ? 'border-red-500' : 'border-gray-600'} rounded-md text-center bg-gray-700 text-gray-100 focus:ring-indigo-500 focus:border-indigo-500 transition text-md w-4/5`}
@@ -243,7 +244,7 @@ export default function ProfilePage() {
             </>
           ) : (
             <p className="text-lg text-gray-400 mt-[-4px]">
-              @{username || <span className="italic text-gray-500">No username</span>}
+              @{user.username || <span className="italic text-gray-500">No username</span>}
             </p>
           )}
           
@@ -251,14 +252,14 @@ export default function ProfilePage() {
           <div className="mt-4 w-full">
             {isEditing ? (
               <textarea
-                value={bio}
-                onChange={(e) => setBio(e.target.value)}
+                value={editedProfile.bio}
+                onChange={(e) => setEditedProfile({...editedProfile, bio: e.target.value})}
                 className="w-full h-24 p-2 border border-gray-600 rounded-md bg-gray-700 text-gray-100 focus:ring-indigo-500 focus:border-indigo-500 transition text-sm text-center resize-none"
                 placeholder="Tell us about yourself..."
               />
             ) : (
               <p className="text-gray-300 text-sm text-center whitespace-pre-wrap px-2">
-                {bio || <span className="italic text-gray-500">No bio yet.</span>}
+                {user.bio || <span className="italic text-gray-500">No bio yet.</span>}
               </p>
             )}
           </div>
@@ -269,14 +270,14 @@ export default function ProfilePage() {
             {isEditing ? (
               <input
                 type="text"
-                value={profession}
-                onChange={(e) => setProfession(e.target.value)}
+                value={editedProfile.profession}
+                onChange={(e) => setEditedProfile({...editedProfile, profession: e.target.value})}
                 className="inline-block w-auto p-1 border border-gray-600 rounded-md bg-gray-700 text-gray-100 focus:ring-indigo-500 focus:border-indigo-500 transition text-sm"
                 placeholder="Your profession"
               />
             ) : (
               <span className="text-gray-300 text-sm">
-                {profession || <span className="italic text-gray-500">Not set</span>}
+                {user.profession || <span className="italic text-gray-500">Not set</span>}
               </span>
             )}
           </div>
@@ -287,14 +288,14 @@ export default function ProfilePage() {
             {isEditing ? (
               <input
                 type="text"
-                value={education}
-                onChange={(e) => setEducation(e.target.value)}
+                value={editedProfile.education}
+                onChange={(e) => setEditedProfile({...editedProfile, education: e.target.value})}
                 className="inline-block w-auto p-1 border border-gray-600 rounded-md bg-gray-700 text-gray-100 focus:ring-indigo-500 focus:border-indigo-500 transition text-sm"
                 placeholder="Your education"
               />
             ) : (
               <span className="text-gray-300 text-sm">
-                {education || <span className="italic text-gray-500">Not set</span>}
+                {user.education || <span className="italic text-gray-500">Not set</span>}
               </span>
             )}
           </div>
@@ -304,20 +305,19 @@ export default function ProfilePage() {
             {isEditing ? (
               <input
                 type="text"
-                value={twitterUrl} // Ensures the input field uses the current 'twitterUrl' state
-                onChange={(e) => setTwitterUrl(e.target.value)}
+                value={editedProfile.twitterUrl}
+                onChange={(e) => setEditedProfile({...editedProfile, twitterUrl: e.target.value})}
                 className="w-full p-2 border border-gray-600 rounded-md bg-gray-700 text-gray-100 focus:ring-indigo-500 focus:border-indigo-500 transition text-sm text-center"
                 placeholder="Enter your X.com URL (e.g., https://x.com/yourhandle)"
               />
             ) : (
               twitterHandle ? (
                 <a
-                  href={twitterUrl || "#"}
+                  href={user.twitterUrl || "#"}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-400 hover:underline flex items-center justify-center gap-1 text-sm"
                 >
-                  {/* X.com SVG Logo - Replaced Lucide's generic 'X' */}
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none" className="inline-block">
                     <path d="M18.901 1.153h3.685l-8.027 9.183L24 22.845h-7.625l-6.505-8.59L3.901 22.845H.216l8.472-9.664L0 1.153h8.043l5.524 7.57L18.901 1.153zm-1.041 19.336H19.9l-5.6-6.417-6.918-8.529h1.838l4.739 5.82 6.738 8.926z"/>
                   </svg>
@@ -342,12 +342,16 @@ export default function ProfilePage() {
               <button
                 onClick={() => {
                   setIsEditing(false);
-                  // Reset temporary changes if user cancels to the *current session values*
-                  setUsername(user.username || "");
-                  setBio(user.bio || "");
-                  setProfession(user.profession || "");
-                  setEducation(user.education || "");
-                  setTwitterUrl(user.twitterUrl || ""); // This should be reliable if session.user.twitterUrl is correct
+                  // Reset temporary changes to the current session values
+                  if (user) {
+                    setEditedProfile({
+                      username: user.username || "",
+                      bio: user.bio || "",
+                      profession: user.profession || "",
+                      education: user.education || "",
+                      twitterUrl: user.twitterUrl || "",
+                    });
+                  }
                   setUsernameError(null);
                 }}
                 className="flex items-center gap-2 px-6 py-2 bg-gray-700 text-gray-300 rounded-full shadow-md hover:bg-gray-600 transition"

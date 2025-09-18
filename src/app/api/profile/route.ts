@@ -23,5 +23,5 @@ export async function PUT(req: Request) {
     },
   });
 
-  return NextResponse.json(updatedUser);
+  return NextResponse.json({success: true, user: updatedUser });
 }
