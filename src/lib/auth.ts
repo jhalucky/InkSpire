@@ -24,7 +24,7 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        // Get full user data from the database on initial sign-in
+        // Get full user data from the database on initial sign-in.
         const dbUser = await prisma.user.findUnique({
           where: { id: user.id },
         });
@@ -38,12 +38,11 @@ export const authOptions: NextAuthOptions = {
             twitterUrl: dbUser.twitterUrl,
             profession: dbUser.profession,
             education: dbUser.education,
-            image: dbUser.avatar, // Use 'avatar' field from Prisma
+            image: dbUser.avatar,
           };
         }
       }
 
-      // On subsequent requests, token.id is available
       if (token.id) {
         const dbUser = await prisma.user.findUnique({
           where: { id: token.id as string },
@@ -57,12 +56,13 @@ export const authOptions: NextAuthOptions = {
             twitterUrl: dbUser.twitterUrl,
             profession: dbUser.profession,
             education: dbUser.education,
-            image: dbUser.avatar, // Use 'avatar' field from Prisma
+            image: dbUser.avatar,
           };
         }
       }
       return token;
     },
+
     async session({ session, token }) {
       if (token && session.user) {
         session.user.id = token.id as string;
@@ -75,19 +75,22 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
+
+    // This is the correct place to handle the redirect for new users.
     async signIn({ user }) {
       const dbUser = await prisma.user.findUnique({
         where: { id: user.id },
-        select: { username: true }
+        select: { username: true },
       });
 
       if (!dbUser || !dbUser.username) {
-        // Correctly return the URL to redirect the new user
+        // If the user has no username, redirect them to the setup page.
         return "/profile/setup";
       }
 
+      // If the user has a username, allow them to sign in normally.
       return true;
-    }
+    },
   },
   pages: {
     signIn: "/signin",
