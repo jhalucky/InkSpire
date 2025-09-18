@@ -86,7 +86,7 @@ export const authOptions: NextAuthOptions = {
 
         if (!dbUser || !dbUser.username) {
             // User exists in DB but has no username, likely a new user
-            return '/profile/setup';
+            return true;
         }
 
         return true;
