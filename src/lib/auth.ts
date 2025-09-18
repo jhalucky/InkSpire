@@ -23,27 +23,27 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async jwt({ token, user }) {
-      // On initial sign-in, the `user` object is populated by the adapter.
-      // We use it to populate the JWT with our custom fields.
       if (user) {
-        // The `user` object from the adapter has all the database fields,
-        // including your custom ones.
-        return {
-          ...token,
-          id: user.id,
-          username: (user as any).username,
-          bio: (user as any).bio,
-          twitterUrl: (user as any).twitterUrl,
-          profession: (user as any).profession,
-          education: (user as any).education,
-          // Use the `image` field, as it's the standard NextAuth property
-          image: (user as any).image,
-        };
+        // Get full user data from the database on initial sign-in
+        const dbUser = await prisma.user.findUnique({
+          where: { id: user.id },
+        });
+
+        if (dbUser) {
+          return {
+            ...token,
+            id: dbUser.id,
+            username: dbUser.username,
+            bio: dbUser.bio,
+            twitterUrl: dbUser.twitterUrl,
+            profession: dbUser.profession,
+            education: dbUser.education,
+            image: dbUser.avatar, // Use 'avatar' field from Prisma
+          };
+        }
       }
 
-      // On subsequent requests, the `user` object is undefined.
-      // We retrieve the latest user data from the database using the token's ID
-      // to ensure the session is always up to date.
+      // On subsequent requests, token.id is available
       if (token.id) {
         const dbUser = await prisma.user.findUnique({
           where: { id: token.id as string },
@@ -57,11 +57,10 @@ export const authOptions: NextAuthOptions = {
             twitterUrl: dbUser.twitterUrl,
             profession: dbUser.profession,
             education: dbUser.education,
-            avatar: dbUser.avatar,
+            image: dbUser.avatar, // Use 'avatar' field from Prisma
           };
         }
       }
-
       return token;
     },
     async session({ session, token }) {
@@ -72,16 +71,26 @@ export const authOptions: NextAuthOptions = {
         session.user.twitterUrl = token.twitterUrl as string | null | undefined;
         session.user.profession = token.profession as string | null | undefined;
         session.user.education = token.education as string | null | undefined;
-        session.user.avatar = token.avatar as string | null | undefined;
+        session.user.image = token.image as string | null | undefined;
       }
       return session;
     },
-    async signIn({ isNewUser }) {
-      if (isNewUser) {
-        return "/profile/setup";
-      }
-      return true;
-    },
+    // The `signIn` callback is the correct place for redirect logic
+    async signIn({ user }) {
+        // Check if the user is new by checking for the `username` field.
+        // This is a more reliable way to handle redirects for new users.
+        const dbUser = await prisma.user.findUnique({
+            where: { id: user.id },
+            select: { username: true } // Only fetch the username for performance
+        });
+
+        if (!dbUser || !dbUser.username) {
+            // User exists in DB but has no username, likely a new user
+            return '/profile/setup';
+        }
+
+        return true;
+    }
   },
   pages: {
     signIn: "/signin",
