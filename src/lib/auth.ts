@@ -57,7 +57,7 @@ export const authOptions: NextAuthOptions = {
             twitterUrl: dbUser.twitterUrl,
             profession: dbUser.profession,
             education: dbUser.education,
-            image: dbUser.image,
+            avatar: dbUser.avatar,
           };
         }
       }
@@ -72,7 +72,7 @@ export const authOptions: NextAuthOptions = {
         session.user.twitterUrl = token.twitterUrl as string | null | undefined;
         session.user.profession = token.profession as string | null | undefined;
         session.user.education = token.education as string | null | undefined;
-        session.user.image = token.image as string | null | undefined;
+        session.user.avatar = token.avatar as string | null | undefined;
       }
       return session;
     },
