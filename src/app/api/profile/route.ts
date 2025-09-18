@@ -17,6 +17,7 @@ export async function PUT(req: Request) {
     data: {
       bio: body.bio,
       profession: body.profession,
+      education: body.education,
       twitterUrl: body.twitterUrl,
       avatar: body.avatar, // if uploading custom avatar
     },
