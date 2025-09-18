@@ -75,21 +75,18 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
-    // The `signIn` callback is the correct place for redirect logic
     async signIn({ user }) {
-        // Check if the user is new by checking for the `username` field.
-        // This is a more reliable way to handle redirects for new users.
-        const dbUser = await prisma.user.findUnique({
-            where: { id: user.id },
-            select: { username: true } // Only fetch the username for performance
-        });
+      const dbUser = await prisma.user.findUnique({
+        where: { id: user.id },
+        select: { username: true }
+      });
 
-        if (!dbUser || !dbUser.username) {
-            // User exists in DB but has no username, likely a new user
-            return true;
-        }
+      if (!dbUser || !dbUser.username) {
+        // Correctly return the URL to redirect the new user
+        return "/profile/setup";
+      }
 
-        return true;
+      return true;
     }
   },
   pages: {
