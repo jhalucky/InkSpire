@@ -18,7 +18,7 @@ export default function SignInPage() {
       <h1 className="text-3xl font-bold mb-6">Sign In</h1>
       {error === "OAuthAccountNotLinked" && (
         <p className="text-red-500 mb-4 text-sm text-center">
-          You don't have an account with this provider. Please{" "}
+          You don&apos;t have an account with this provider. Please{" "}
           <Link href="/signup" className="text-blue-400 underline">
             sign up
           </Link>{" "}
@@ -42,7 +42,7 @@ export default function SignInPage() {
         </button>
       </div>
       <p className="mt-4 text-sm text-gray-400">
-        Don't have an account?{" "}
+        Don&apos;t have an account?{" "}
         <Link href="/signin" className="text-blue-400 hover:underline">
           Sign in
         </Link>

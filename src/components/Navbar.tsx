@@ -20,7 +20,7 @@ export default function Navbar() {
         <button
           onClick={() => {
             if (!session) {
-              signIn("google"); // Redirect to sign-in if not logged in
+              signOut({ callbackUrl: "/signin" });
             } else {
               // Redirect to create blog page if logged in
               // We'll create this page later

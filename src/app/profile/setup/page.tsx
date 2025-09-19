@@ -1,23 +1,24 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Image from "next/image";
 
 export default function ProfileSetupPage() {
   const { data: session, status, update } = useSession();
+  const router = useRouter();
+
   const [username, setUsername] = useState(session?.user?.username || "");
   const [bio, setBio] = useState(session?.user?.bio || "");
   const [profession, setProfession] = useState(session?.user?.profession || "");
   const [education, setEducation] = useState(session?.user?.education || "");
   const [twitterUrl, setTwitterUrl] = useState(session?.user?.twitterUrl || "");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   if (status === "loading") {
     return (
@@ -27,9 +28,6 @@ export default function ProfileSetupPage() {
     );
   }
 
-  // The redirect logic here is being removed. The page should be accessible for editing.
-  // The initial redirect for new users is handled by NextAuth.js's 'newUser' page option.
-
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -38,7 +36,6 @@ export default function ProfileSetupPage() {
     }
   };
 
-  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -52,16 +49,18 @@ export default function ProfileSetupPage() {
         throw new Error("Cloudinary cloud name is not set.");
       }
 
-      // Handle image upload if a new file is selected
       if (imageFile) {
         const formData = new FormData();
         formData.append("file", imageFile);
-        formData.append("upload_preset", "inkspire-profile-image");
+        formData.append("upload_preset", "your_cloudinary_upload_preset");
 
-        const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudinaryCloudName}/image/upload`, {
-          method: "POST",
-          body: formData,
-        });
+        const uploadRes = await fetch(
+          `https://api.cloudinary.com/v1_1/${cloudinaryCloudName}/image/upload`,
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
 
         if (!uploadRes.ok) {
           const errorData = await uploadRes.json();
@@ -83,7 +82,7 @@ export default function ProfileSetupPage() {
           profession,
           education,
           twitterUrl,
-          image: imageUrl
+          image: imageUrl,
         }),
       });
 
@@ -93,8 +92,7 @@ export default function ProfileSetupPage() {
       }
 
       await update();
-      router.push('/profile');
-      
+      router.push("/profile");
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -103,7 +101,7 @@ export default function ProfileSetupPage() {
   };
 
   const handleCancel = () => {
-    router.push('/profile');
+    router.push("/profile");
   };
 
   return (
@@ -111,27 +109,45 @@ export default function ProfileSetupPage() {
       <h1 className="text-3xl font-bold mb-6">Complete Your Profile</h1>
       {error && <p className="text-red-500 mb-4">{error}</p>}
       <form onSubmit={handleSubmit} className="w-full space-y-4">
-        {/* Profile Image with upload button */}
         <div className="relative w-24 h-24 mx-auto mb-4 group">
           <Image
-            src={imagePreview || session?.user?.image || "https://placehold.co/96x96/FFFFFF/212121?text=N/A"}
+            src={
+              imagePreview ||
+              session?.user?.image ||
+              "https://placehold.co/96x96/FFFFFF/212121?text=N/A"
+            }
             alt="Profile Avatar"
             fill
             className="rounded-full object-cover border-4 border-gray-700"
           />
-          <label htmlFor="avatar-upload" className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+          <label
+            htmlFor="avatar-upload"
+            className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+          >
+            <svg
+              className="w-6 h-6 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+              />
+            </svg>
           </label>
           <input
             id="avatar-upload"
             type="file"
-            accept=".png, .jpeg, .jpg" // Only allow PNG and JPEG files
+            accept=".png, .jpeg, .jpg"
             onChange={handleImageChange}
             className="hidden"
           />
         </div>
 
-        {/* Form fields */}
         <div>
           <label htmlFor="username" className="block text-gray-400 mb-1">
             Username

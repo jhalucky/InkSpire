@@ -18,9 +18,9 @@ export const authOptions: AuthOptions = {
     }),
   ],
   pages: {
-    signIn: "/signin", // Use our custom sign-in page
+    signIn: "/signin",
     newUser: "/profile/setup",
-    error: "/api/auth/error", // Use a custom error page
+    error: "/api/auth/error",
   },
   callbacks: {
     async session({ session, user }) {
@@ -49,13 +49,11 @@ export const authOptions: AuthOptions = {
       }
       return session;
     },
-    async signIn({ user, account, profile }) {
-      // Check if the user is signing in with an email that is already in the database
+    async signIn({ user }) {
       const existingUser = await prisma.user.findUnique({
-        where: { email: user.email },
+        where: { email: user.email as string },
       });
 
-      // If the user doesn't exist, block the sign-in and redirect to the signup page
       if (!existingUser) {
         return `/signup?error=OAuthAccountNotLinked`;
       }
