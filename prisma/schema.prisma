@@ -16,10 +16,10 @@ model User {
   username      String?   @unique
   email         String    @unique
   emailVerified DateTime? 
+  image         String?
   bio           String?
   profession    String?
   education     String?
-  image         String?
   missionstatement String?
   twitterUrl     String?  @unique
   accounts      Account[]
