@@ -43,8 +43,8 @@ export default function SignInPage() {
       </div>
       <p className="mt-4 text-sm text-gray-400">
         Don&apos;t have an account?{" "}
-        <Link href="/signup" className="text-blue-400 hover:underline">
-          Sign up
+        <Link href="/signin" className="text-blue-400 hover:underline">
+          Sign in
         </Link>
       </p>
     </div>

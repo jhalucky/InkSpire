@@ -25,7 +25,6 @@ export const authOptions: AuthOptions = {
   callbacks: {
     async session({ session, user }) {
       if (session?.user) {
-        // Fetch the full user object from the database with all fields
         const fullUser = await prisma.user.findUnique({
           where: { id: user.id },
           select: {
@@ -41,7 +40,6 @@ export const authOptions: AuthOptions = {
           },
         });
         
-        // Extend the session with the custom user fields
         session.user = {
           ...session.user,
           ...fullUser,
@@ -49,15 +47,7 @@ export const authOptions: AuthOptions = {
       }
       return session;
     },
-    async signIn({ user }) {
-      const existingUser = await prisma.user.findUnique({
-        where: { email: user.email as string },
-      });
-
-      if (!existingUser) {
-        return `/signup?error=OAuthAccountNotLinked`;
-      }
-      return true;
-    },
+    // The custom signIn callback is removed to allow NextAuth.js
+    // to handle new user creation automatically with the Prisma adapter.
   },
 };
