@@ -118,7 +118,6 @@ const ProfileCard = ({ session, refreshSession }: { session: any, refreshSession
 
 export default function ProfilePage() {
   const { data: session, status, update } = useSession();
-  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   if (status === "loading") {

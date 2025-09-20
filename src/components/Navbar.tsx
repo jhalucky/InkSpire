@@ -22,8 +22,6 @@ export default function Navbar() {
             if (!session) {
               signOut({ callbackUrl: "/signin" });
             } else {
-              // Redirect to create blog page if logged in
-              // We'll create this page later
               console.log("Redirecting to create blog page...");
             }
           }}
@@ -32,17 +30,18 @@ export default function Navbar() {
           Write a Blog
         </button>
 
-        {/* Conditional rendering for Profile or Sign Up */}
+        {/* Conditional rendering for Profile or Sign In */}
         {session ? (
           <Link href="/profile">
             {session.user?.image ? (
-              <Image
-                src={session.user.image}
-                alt="User Avatar"
-                width={36}
-                height={36}
-                className="rounded-full cursor-pointer"
-              />
+              <div className="w-10 h-10 min-w-[40px] min-h-[40px] relative rounded-full overflow-hidden">
+                <Image
+                  src={session.user.image}
+                  alt="User Avatar"
+                  fill
+                  className="object-cover w-full h-full cursor-pointer"
+                />
+              </div>
             ) : (
               <span className="text-sm cursor-pointer">Profile</span>
             )}
