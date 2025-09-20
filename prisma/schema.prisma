@@ -1,11 +1,9 @@
-// prisma/schema.prisma
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "postgresql" // or your current DB
   url      = env("DATABASE_URL")
 }
 
@@ -13,23 +11,28 @@ datasource db {
 // User Model
 // ----------------------
 model User {
-  id              String     @id @default(cuid())
-  name            String?
-  username        String?    @unique
-  email           String     @unique
-  emailVerified   DateTime?
-  image           String?
+  id               String     @id @default(cuid())
+  name             String?
+  username         String?    @unique
+  email            String     @unique
+  emailVerified    DateTime?
+  image            String?
   
   // Custom profile fields
-  bio             String?
-  profession      String?
-  education       String?
+  bio              String?
+  profession       String?
+  education        String?
   missionstatement String?
-  twitterUrl      String?    
+  twitterUrl       String?    
 
   // NextAuth relations
-  accounts        Account[]
-  sessions        Session[]
+  accounts         Account[]
+  sessions         Session[]
+
+  // Blog relations
+  blogs            Blog[]          // Blogs authored by user
+  comments         Comment[]       // Comments made by user
+  blogLikes        BlogLike[]      // Blogs liked by user
 }
 
 // ----------------------
@@ -67,7 +70,7 @@ model Session {
 }
 
 // ----------------------
-// Verification Token (Needed for Email Auth)
+// Verification Token (Email Auth)
 // ----------------------
 model VerificationToken {
   identifier String
@@ -76,3 +79,48 @@ model VerificationToken {
 
   @@unique([identifier, token])
 }
+
+// ----------------------
+// Blog Model
+// ----------------------
+model Blog {
+  id        String      @id @default(cuid())
+  title     String
+  content   String      // Can be markdown or rich text
+  author    User        @relation(fields: [authorId], references: [id])
+  authorId  String
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  // Relations
+  comments  Comment[]
+  likes     BlogLike[]
+}
+
+// ----------------------
+// Comment Model
+// ----------------------
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  String
+  blog      Blog     @relation(fields: [blogId], references: [id])
+  blogId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ----------------------
+// Blog Like Model
+// ----------------------
+model BlogLike {
+  id      String   @id @default(cuid())
+  user    User     @relation(fields: [userId], references: [id])
+  userId  String
+  blog    Blog     @relation(fields: [blogId], references: [id])
+  blogId  String
+
+  @@unique([userId, blogId]) // Prevent duplicate likes
+}
+
