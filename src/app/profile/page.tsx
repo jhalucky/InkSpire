@@ -1,24 +1,20 @@
 "use client";
 
 import { useSession, signOut } from "next-auth/react";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-// The profile card component to be displayed on the page
-const ProfileCard = ({ session }: { session: any }) => {
+// Profile card component
+const ProfileCard = ({ session, refreshSession }: { session: any, refreshSession: () => void }) => {
   const user = session.user;
+  const [imageUrl, setImageUrl] = useState(user.image);
 
-  // Function to render the Twitter URL with the new X logo
-  const renderTwitterUrl = () => {
-    if (!user.twitterUrl) {
-      return "Not Set";
-    }
-
-    // Extract the username from the URL
-    const username = user.twitterUrl.split('/').pop();
-
+  // Function to render Twitter username
+  const renderTwitterUsername = () => {
+    if (!user.twitterUrl) return "Not Set";
+    const username = user.twitterUrl.split("/").pop();
     return (
       <div className="flex items-center gap-2">
         <svg
@@ -44,6 +40,11 @@ const ProfileCard = ({ session }: { session: any }) => {
     );
   };
 
+  // Refresh image if session updates
+  useEffect(() => {
+    setImageUrl(session.user.image);
+  }, [session.user.image]);
+
   return (
     <div className="flex flex-col items-center p-8 bg-gray-900 text-white rounded-lg shadow-lg max-w-xl mx-auto my-12 relative">
       {/* Edit Profile Button */}
@@ -66,17 +67,15 @@ const ProfileCard = ({ session }: { session: any }) => {
         </button>
       </Link>
 
-      {/* Profile Image with placeholder */}
-      {user.image && (
-        <div className="relative w-24 h-24 mb-4">
-          <Image
-            src={user.image}
-            alt="Profile Avatar"
-            fill
-            className="rounded-full object-cover border-4 border-gray-700"
-          />
-        </div>
-      )}
+      {/* Profile Image */}
+      <div className="relative w-28 h-28 mb-4">
+        <Image
+          src={imageUrl || "https://placehold.co/112x112/FFFFFF/212121?text=N/A"}
+          alt="Profile Avatar"
+          fill
+          className="rounded-full object-cover border-4 border-gray-700"
+        />
+      </div>
 
       {/* User Info */}
       <h2 className="text-2xl font-bold">{user.name || "User"}</h2>
@@ -88,25 +87,19 @@ const ProfileCard = ({ session }: { session: any }) => {
       <div className="mt-6 w-full text-left space-y-2">
         <div>
           <span className="font-semibold text-gray-400">Bio:</span>{" "}
-          <span className="text-gray-200">
-            {user.bio || "Not Set"}
-          </span>
+          <span className="text-gray-200">{user.bio || "Not Set"}</span>
         </div>
         <div>
           <span className="font-semibold text-gray-400">Profession:</span>{" "}
-          <span className="text-gray-200">
-            {user.profession || "Not Set"}
-          </span>
+          <span className="text-gray-200">{user.profession || "Not Set"}</span>
         </div>
         <div>
           <span className="font-semibold text-gray-400">Education:</span>{" "}
-          <span className="text-gray-200">
-            {user.education || "Not Set"}
-          </span>
+          <span className="text-gray-200">{user.education || "Not Set"}</span>
         </div>
         <div>
           <span className="font-semibold text-gray-400">Twitter:</span>{" "}
-          {renderTwitterUrl()}
+          {renderTwitterUsername()}
         </div>
       </div>
 
@@ -126,6 +119,7 @@ const ProfileCard = ({ session }: { session: any }) => {
 export default function ProfilePage() {
   const { data: session, status, update } = useSession();
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   if (status === "loading") {
     return (
@@ -135,15 +129,15 @@ export default function ProfilePage() {
     );
   }
 
-  // Only redirect if there's no session at all
   if (!session) {
-    redirect("/");
+    router.push("/");
+    return null;
   }
 
   return (
     <div className="flex flex-col items-center justify-center p-4 min-h-screen">
       <h1 className="text-3xl font-bold text-gray-800 mb-6">User Profile</h1>
-      <ProfileCard session={session} />
+      <ProfileCard session={session} refreshSession={update} />
     </div>
   );
 }
