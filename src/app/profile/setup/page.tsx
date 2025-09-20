@@ -35,6 +35,11 @@ export default function ProfileSetupPage() {
       setImagePreview(URL.createObjectURL(file));
     }
   };
+  
+
+
+const cloudinaryUploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,7 +57,7 @@ export default function ProfileSetupPage() {
       if (imageFile) {
         const formData = new FormData();
         formData.append("file", imageFile);
-        formData.append("upload_preset", "your_cloudinary_upload_preset");
+        formData.append("upload_preset", cloudinaryUploadPreset as string);
 
         const uploadRes = await fetch(
           `https://api.cloudinary.com/v1_1/${cloudinaryCloudName}/image/upload`,

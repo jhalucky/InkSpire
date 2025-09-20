@@ -25,7 +25,7 @@ model User {
   profession      String?
   education       String?
   missionstatement String?
-  twitterUrl      String?    @unique
+  twitterUrl      String?    
 
   // NextAuth relations
   accounts        Account[]
