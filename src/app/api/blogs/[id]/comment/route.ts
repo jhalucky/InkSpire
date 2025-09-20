@@ -1,10 +1,10 @@
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { NextResponse } from "next/server";
 
 export async function POST(
-  req: Request,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   const session = await getServerSession(authOptions);
@@ -13,7 +13,7 @@ export async function POST(
   }
 
   try {
-    const { content } = await req.json();
+    const { content } = await request.json();
     if (!content || content.trim() === "") {
       return NextResponse.json({ error: "Empty comment" }, { status: 400 });
     }
@@ -23,10 +23,7 @@ export async function POST(
     });
     if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-    // Check if the blog exists
-    const blog = await prisma.blog.findUnique({
-      where: { id: params.id },
-    });
+    const blog = await prisma.blog.findUnique({ where: { id: params.id } });
     if (!blog) return NextResponse.json({ error: "Blog not found" }, { status: 404 });
 
     const comment = await prisma.comment.create({
