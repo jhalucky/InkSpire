@@ -1,20 +1,21 @@
+// src/lib/auth.ts
+
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { AuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import { prisma } from "./prisma";
-import { Session } from "next-auth";
 
 export const authOptions: AuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
     GitHubProvider({
-      clientId: process.env.GITHUB_ID as string,
-      clientSecret: process.env.GITHUB_SECRET as string,
+      clientId: process.env.GITHUB_ID!,
+      clientSecret: process.env.GITHUB_SECRET!,
     }),
   ],
   pages: {
@@ -22,6 +23,10 @@ export const authOptions: AuthOptions = {
     newUser: "/profile/setup",
     error: "/api/auth/error",
   },
+  session: {
+    strategy: "database", // ensures sessions are stored in PostgreSQL
+  },
+  secret: process.env.NEXTAUTH_SECRET, // required for production
   callbacks: {
     async session({ session, user }) {
       if (session?.user) {
@@ -39,7 +44,7 @@ export const authOptions: AuthOptions = {
             twitterUrl: true,
           },
         });
-        
+
         session.user = {
           ...session.user,
           ...fullUser,
@@ -47,7 +52,5 @@ export const authOptions: AuthOptions = {
       }
       return session;
     },
-    // The custom signIn callback is removed to allow NextAuth.js
-    // to handle new user creation automatically with the Prisma adapter.
   },
 };
