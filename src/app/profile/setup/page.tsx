@@ -66,7 +66,7 @@ export default function ProfileSetupPage() {
 
         const uploadData = await uploadRes.json();
         imageUrl = uploadData.secure_url;
-        setImagePreview(imageUrl);
+        setImagePreview(imageUrl || null);
       }
 
       const res = await fetch("/api/profile/update-image", {
