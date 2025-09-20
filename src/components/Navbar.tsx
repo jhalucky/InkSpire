@@ -1,11 +1,13 @@
 "use client";
 
 import { useSession, signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 
 export default function Navbar() {
   const { data: session } = useSession();
+  const router = useRouter();
 
   return (
     <nav className="flex items-center justify-between p-4 bg-gray-800 text-white">
@@ -22,7 +24,7 @@ export default function Navbar() {
             if (!session) {
               signOut({ callbackUrl: "/signin" });
             } else {
-              console.log("Redirecting to create blog page...");
+              router.push("/blog/create")
             }
           }}
           className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"

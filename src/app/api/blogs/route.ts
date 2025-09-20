@@ -4,18 +4,16 @@ import { NextResponse } from "next/server";
 export async function GET() {
   try {
     const blogs = await prisma.blog.findMany({
-      orderBy: { createdAt: "desc" },
       include: {
-        author: {
-          select: { id: true, name: true, username: true, image: true },
-        },
-        comments: { select: { id: true } },
-        likes: { select: { id: true } },
+        author: true,
+        likes: true,
+        comments: { include: { author: true } },
       },
+      orderBy: { createdAt: "desc" },
     });
-
     return NextResponse.json(blogs);
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ error: "Failed to fetch blogs" }, { status: 500 });
   }
 }
