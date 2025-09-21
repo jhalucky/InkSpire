@@ -49,10 +49,18 @@ export default function BlogCard({
   };
 
   // Toggle like on frontend
-  const handleLike = () => {
-    const hasLiked = likes.some((like) => like.id === currentUserId);
-    setLikes(hasLiked ? likes.filter((l) => l.id !== currentUserId) : [...likes, { id: currentUserId }]);
-  };
+const handleLike = async () => {
+  try {
+    const res = await fetch(`/api/blogs/${blog.id}/like`, { method: "POST" });
+    if (!res.ok) throw new Error("Failed to toggle like");
+
+    const data = await res.json(); // { liked: boolean, likesCount: number }
+    setLikes(new Array(data.likesCount).fill({ id: currentUserId })); // Update UI
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 
   return (
     <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg p-6 mb-6 transition-transform hover:scale-[1.01]">
