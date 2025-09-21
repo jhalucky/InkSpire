@@ -2,11 +2,9 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
-export async function GET(
-  request: Request,
-  context: { params: { id: string } }
-) {
-  const { id } = context.params;
+export const GET = async (request: Request, context: { params: Promise<{ id: string }> }) => {
+  const { id } = await context.params; // await the params promise
+
   try {
     const blog = await prisma.blog.findUnique({
       where: { id },
@@ -26,4 +24,4 @@ export async function GET(
     console.error(err);
     return NextResponse.json({ error: "Failed to fetch blog" }, { status: 500 });
   }
-}
+};
