@@ -36,7 +36,7 @@ function ProfileCard({ user }: { user: UserProfile }) {
 
         {twitterHandle && (
           <a
-            href={user.twitterUrl}
+            href={user.twitterUrl || undefined}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1 text-blue-500 mt-1 hover:underline"
