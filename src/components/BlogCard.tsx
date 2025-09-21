@@ -7,13 +7,13 @@ import { Heart } from "lucide-react";
 
 const fallbackImage = "https://cdn-icons-png.flaticon.com/512/1144/1144760.png";
 
-export type Blog = {
+type Blog = {
   id: string;
   title: string;
   content: string;
-  author: { id: string; name?: string; username?: string; image?: string } | null;
+  author: { name?: string | null; username?: string | null; image?: string | null } | null;
   likes?: { id: string }[];
-  comments?: { id: string; content: string; author: { name?: string; image?: string } }[];
+  comments?: { id: string; content: string; author: { name?: string | null; image?: string | null } }[];
 };
 
 export default function BlogCard({
@@ -27,10 +27,9 @@ export default function BlogCard({
   const [comments, setComments] = useState(blog.comments ?? []);
   const [likes, setLikes] = useState(blog.likes ?? []);
 
-  // Handle posting a comment
+  // Post a comment
   const handleCommentSubmit = async () => {
     if (!comment.trim()) return;
-
     try {
       const res = await fetch(`/api/blogs/${blog.id}/comment`, {
         method: "POST",
@@ -39,7 +38,6 @@ export default function BlogCard({
       });
 
       if (!res.ok) throw new Error("Failed to post comment");
-
       const newComment = await res.json();
       setComments((prev) => [...prev, newComment]);
       setComment("");
@@ -48,39 +46,40 @@ export default function BlogCard({
     }
   };
 
-  // Toggle like on frontend
-const handleLike = async () => {
-  try {
-    const res = await fetch(`/api/blogs/${blog.id}/like`, { method: "POST" });
-    if (!res.ok) throw new Error("Failed to toggle like");
-
-    const data = await res.json(); // { liked: boolean, likesCount: number }
-    setLikes(new Array(data.likesCount).fill({ id: currentUserId })); // Update UI
-  } catch (err) {
-    console.error(err);
-  }
-};
-
+  // Toggle like
+  const handleLike = async () => {
+    try {
+      const res = await fetch(`/api/blogs/${blog.id}/like`, { method: "POST" });
+      if (!res.ok) throw new Error("Failed to toggle like");
+      const data = await res.json(); // { liked: boolean, likesCount: number }
+      setLikes(new Array(data.likesCount).fill({ id: currentUserId }));
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   return (
     <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg p-6 mb-6 transition-transform hover:scale-[1.01]">
-      
       {/* Author */}
       <div className="flex items-center gap-3 mb-4">
-        <Link  href={`/user/${blog.author?.username}`}>
-        <Image
-          src={blog.author?.image || fallbackImage}
-          alt={blog.author?.name || "Unknown Author"}
-          width={40}
-          height={40}
-          className="w-10 h-10 rounded-full object-cover border border-gray-300 dark:border-gray-600 cursor-pointer"
-        />
+        <Link href={`/user/${blog.author?.username ?? ""}`}>
+          <Image
+            src={blog.author?.image ?? fallbackImage}
+            alt={blog.author?.name ?? "Unknown Author"}
+            width={40}
+            height={40}
+            className="w-10 h-10 rounded-full object-cover border border-gray-300 dark:border-gray-600 cursor-pointer"
+          />
         </Link>
-
-
         <div>
-          <Link  href={`/user/${blog.author?.username}`}><p className="font-semibold text-gray-900 dark:text-gray-100">{blog.author?.name || "Unknown Author"}</p></Link>
-          <p className="text-sm text-gray-500 dark:text-gray-400">@{blog.author?.username || "unknown"}</p>
+          <Link href={`/user/${blog.author?.username ?? ""}`}>
+            <p className="font-semibold text-gray-900 dark:text-gray-100">
+              {blog.author?.name ?? "Unknown Author"}
+            </p>
+          </Link>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            @{blog.author?.username ?? "unknown"}
+          </p>
         </div>
       </div>
 
@@ -93,7 +92,9 @@ const handleLike = async () => {
         <button
           onClick={handleLike}
           className={`flex items-center gap-1 transition ${
-            likes.some((l) => l.id === currentUserId) ? "text-red-500" : "text-gray-600 dark:text-gray-300"
+            likes.some((l) => l.id === currentUserId)
+              ? "text-red-500"
+              : "text-gray-600 dark:text-gray-300"
           }`}
         >
           <Heart className="w-5 h-5" />
@@ -110,23 +111,25 @@ const handleLike = async () => {
 
       {/* Comments */}
       <div className="mt-2">
-        <p className="font-semibold text-gray-800 dark:text-gray-200 mb-2">Comments ({comments.length})</p>
+        <p className="font-semibold text-gray-800 dark:text-gray-200 mb-2">
+          Comments ({comments.length})
+        </p>
         {comments.slice(0, 2).map((c) => (
           <div key={c.id} className="flex items-start gap-2 mb-2">
-            <Link  href={`/user/${blog.author?.username}`}>
-            <Image
-              src={c.author?.image || fallbackImage}
-              alt={c.author?.name || "Anonymous"}
-              width={28}
-              height={28}
-              className="w-7 h-7 rounded-full object-cover border border-gray-300 dark:border-gray-600"
-            />
+            <Link href={`/user/${blog.author?.username ?? ""}`}>
+              <Image
+                src={c.author?.image ?? fallbackImage}
+                alt={c.author?.name ?? "Anonymous"}
+                width={28}
+                height={28}
+                className="w-7 h-7 rounded-full object-cover border border-gray-300 dark:border-gray-600"
+              />
             </Link>
-            
-            <Link  href={`/user/${blog.author?.username}`}>
-            <p className="text-sm text-gray-700 dark:text-gray-300">
-              <span className="font-medium">{c.author?.name || "Anonymous"}:</span> {c.content}
-            </p>
+            <Link href={`/user/${blog.author?.username ?? ""}`}>
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                <span className="font-medium">{c.author?.name ?? "Anonymous"}:</span>{" "}
+                {c.content}
+              </p>
             </Link>
           </div>
         ))}

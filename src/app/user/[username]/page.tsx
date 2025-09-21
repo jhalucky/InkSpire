@@ -1,38 +1,28 @@
-// src/app/user/[username]/page.tsx
 import { prisma } from "@/lib/prisma";
-import BlogCard, { Blog } from "@/components/BlogCard";
+import BlogCard from "@/components/BlogCard";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import Image from "next/image";
 
 type Props = { params: { username: string } };
 
-// Extend Blog type from BlogCard with Prisma relations
-type BlogWithRelations = Blog & {
-  likes: { id: string }[];
-  comments: { content: string; author: { name?: string | null; image?: string | null } }[];
+type BlogForCard = {
+  id: string;
+  title: string;
+  content: string;
+  author: { name?: string | null; username?: string | null; image?: string | null } | null;
+  likes?: { id: string }[];
+  comments?: { id: string; content: string; author: { name?: string | null; image?: string | null } }[];
 };
 
-// Define user object type returned from Prisma
-type UserWithBlogs = {
-  id: string;
-  name?: string | null;
-  username: string;
-  image?: string | null;
-  bio?: string | null;
-  twitterUrl?: string | null;
-  blogs: BlogWithRelations[];
-};
 
 export default async function UserProfilePage({ params }: Props) {
   const { username } = params;
 
-  // Get current logged-in user ID
   const session = await getServerSession(authOptions);
-  const currentUserId = session?.user?.id || "";
+  const currentUserId = session?.user?.id ?? "";
 
-  // Fetch user with blogs
-  const user: UserWithBlogs | null = await prisma.user.findUnique({
+  const user = await prisma.user.findUnique({
     where: { username },
     include: {
       blogs: {
@@ -48,7 +38,7 @@ export default async function UserProfilePage({ params }: Props) {
 
   if (!user) return <p>User not found</p>;
 
-  // Extract Twitter handle from URL
+  // Twitter handle
   let twitterHandle: string | null = null;
   if (user.twitterUrl) {
     try {
@@ -64,20 +54,16 @@ export default async function UserProfilePage({ params }: Props) {
       {/* Profile Card */}
       <div className="flex items-center gap-4 mb-8">
         <Image
-          src={user.image || "/images/default-user.png"}
-          alt={user.name || "Unknown User"}
+          src={user.image ?? "/images/default-user.png"}
+          alt={user.name ?? "Unknown User"}
           height={80}
           width={80}
           className="w-20 h-20 rounded-full object-cover border border-gray-300 dark:border-gray-600"
         />
         <div>
-          <h1 className="text-2xl font-bold">{user.name || "Unknown User"}</h1>
+          <h1 className="text-2xl font-bold">{user.name ?? "Unknown User"}</h1>
           <p className="text-gray-500">@{user.username}</p>
-          {user.bio && (
-            <p className="mt-2 text-gray-700 dark:text-gray-300">{user.bio}</p>
-          )}
-
-          {/* Twitter/X Link */}
+          {user.bio && <p className="mt-2 text-gray-700 dark:text-gray-300">{user.bio}</p>}
           {user.twitterUrl && twitterHandle && (
             <a
               href={user.twitterUrl}
@@ -100,12 +86,12 @@ export default async function UserProfilePage({ params }: Props) {
         </div>
       </div>
 
-      {/* User's Blogs */}
+      {/* Blogs */}
       <div className="space-y-6">
         {user.blogs.length === 0 ? (
           <p className="text-gray-700 dark:text-gray-300">No blogs yet.</p>
         ) : (
-          user.blogs.map((blog) => (
+          user.blogs.map((blog: BlogForCard) => (
             <BlogCard key={blog.id} blog={blog} currentUserId={currentUserId} />
           ))
         )}
