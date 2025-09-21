@@ -15,8 +15,6 @@ type Blog = {
 export default function BlogsPage() {
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // Replace this with current logged-in user id
   const currentUserId = "USER_ID_HERE"; 
 
   useEffect(() => {
@@ -32,7 +30,6 @@ export default function BlogsPage() {
         setLoading(false);
       }
     }
-
     fetchBlogs();
   }, []);
 
@@ -42,9 +39,11 @@ export default function BlogsPage() {
   return (
     <div className="max-w-4xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">All Blogs</h1>
-      {blogs.map((blog) => (
-        <BlogCard key={blog.id} blog={blog} currentUserId={currentUserId} />
-      ))}
+      {blogs
+        .filter((b) => b) // ensure no nulls
+        .map((blog) => (
+          <BlogCard key={blog.id} blog={blog} currentUserId={currentUserId} />
+        ))}
     </div>
   );
 }

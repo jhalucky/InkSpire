@@ -1,151 +1,135 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
+import { Heart } from "lucide-react";
 
-interface Blog {
+const fallbackImage = "https://cdn-icons-png.flaticon.com/512/1144/1144760.png";
+
+type Blog = {
   id: string;
   title: string;
   content: string;
-  author: {
-    id: string;
-    name?: string | null;
-    username?: string | null;
-    image?: string | null;
-  } | null;
-  likes?: { id: string; userId: string }[];
-  comments?: {
-    id: string;
-    content: string;
-    author?: { name?: string | null; image?: string | null };
-  }[];
-}
+  author: { id: string; name?: string; username?: string; image?: string } | null;
+  likes?: { id: string }[];
+  comments?: { id: string; content: string; author: { name?: string; image?: string } }[];
+};
 
-interface BlogCardProps {
+export default function BlogCard({
+  blog,
+  currentUserId,
+}: {
   blog: Blog;
   currentUserId: string;
-}
+}) {
+  const [comment, setComment] = useState("");
+  const [comments, setComments] = useState(blog.comments ?? []);
+  const [likes, setLikes] = useState(blog.likes ?? []);
 
-export default function BlogCard({ blog, currentUserId }: BlogCardProps) {
-  const [likes, setLikes] = useState(blog.likes?.length || 0);
-  const [liked, setLiked] = useState(blog.likes?.some((like) => like.userId === currentUserId) || false);
-  const [comments, setComments] = useState(blog.comments || []);
-  const [newComment, setNewComment] = useState("");
-
-  const authorName = blog.author?.name || "Unknown";
-  const authorUsername = blog.author?.username || "unknown";
-  const authorImage = blog.author?.image || "https://www.flaticon.com/svg/static/icons/svg/1144/1144760.svg";
-
-  // Toggle like
-  const handleLike = async () => {
-    try {
-      const res = await fetch(`/api/blogs/${blog.id}/like`, {
-        method: "POST",
-      });
-      if (!res.ok) throw new Error("Failed to toggle like");
-
-      const data = await res.json();
-      setLikes(data.likesCount);
-      setLiked(data.liked);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  // Post comment
+  // Handle posting a comment
   const handleCommentSubmit = async () => {
-    if (!newComment.trim()) return;
+    if (!comment.trim()) return;
 
     try {
       const res = await fetch(`/api/blogs/${blog.id}/comment`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: newComment }),
+        body: JSON.stringify({ content: comment, authorId: currentUserId }),
       });
+
       if (!res.ok) throw new Error("Failed to post comment");
 
-      const data = await res.json();
-      setComments([...comments, data]);
-      setNewComment("");
+      const newComment = await res.json();
+      setComments((prev) => [...prev, newComment]);
+      setComment("");
     } catch (err) {
-      console.error("Failed to post comment", err);
+      console.error(err);
     }
   };
 
+  // Toggle like on frontend
+  const handleLike = () => {
+    const hasLiked = likes.some((like) => like.id === currentUserId);
+    setLikes(hasLiked ? likes.filter((l) => l.id !== currentUserId) : [...likes, { id: currentUserId }]);
+  };
+
   return (
-    <div className="border rounded-lg p-4 shadow-md mb-4">
-      {/* Author Info */}
-      <div className="flex items-center mb-4">
-        <div className="w-10 h-10 relative rounded-full overflow-hidden">
-          <Image src={authorImage} alt={authorUsername} width={40} height={40} className="object-cover" />
-        </div>
-        <div className="flex flex-col ml-3">
-          <span className="font-bold text-lg">{authorName}</span>
-          <span className="text-sm text-gray-600">@{authorUsername}</span>
-        </div>
-      </div>
-
-      {/* Blog Content */}
-      <h2 className="text-xl font-bold mb-2">{blog.title}</h2>
-      <p className="text-gray-700 mb-2">
-        {blog.content.length > 150 ? `${blog.content.slice(0, 150)}...` : blog.content}
-      </p>
-
-      {blog.content.length > 150 && (
-        <Link href={`/blog/${blog.id}`} className="text-blue-500 font-medium hover:underline">
-          Read more
-        </Link>
-      )}
-
-      {/* Likes & Comments */}
-      <div className="flex items-center mt-3 gap-4">
-        <button onClick={handleLike} className={`text-xl focus:outline-none ${liked ? "text-red-500" : ""}`}>
-          {liked ? "❤️" : "🤍"}
-        </button>
-        <span>{likes} {likes === 1 ? "like" : "likes"}</span>
-        <div className="flex items-center gap-1">
-          💬 {comments.length} {comments.length === 1 ? "comment" : "comments"}
-        </div>
-      </div>
-
-      {/* Comment Input */}
-      <div className="mt-3 flex gap-2">
-        <input
-          type="text"
-          placeholder="Write a comment..."
-          value={newComment}
-          onChange={(e) => setNewComment(e.target.value)}
-          className="flex-1 border rounded px-2 py-1"
+    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg p-6 mb-6 transition-transform hover:scale-[1.01]">
+      
+      {/* Author */}
+      <div className="flex items-center gap-3 mb-4">
+        <Image
+          src={blog.author?.image || fallbackImage}
+          alt={blog.author?.name || "Unknown Author"}
+          width={40}
+          height={40}
+          className="w-10 h-10 rounded-full object-cover border border-gray-300 dark:border-gray-600"
         />
-        <button onClick={handleCommentSubmit} className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">
-          Post
-        </button>
+        <div>
+          <p className="font-semibold text-gray-900 dark:text-gray-100">{blog.author?.name || "Unknown Author"}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">@{blog.author?.username || "unknown"}</p>
+        </div>
       </div>
 
-      {/* Show last 2 comments */}
-      <div className="mt-2 space-y-1">
-        {comments.slice(-2).map((c) => (
-          <div key={c.id} className="flex items-center gap-2">
-            <div className="w-6 h-6 relative rounded-full overflow-hidden">
-              <Image
-                src={c.author?.image || "https://www.flaticon.com/svg/static/icons/svg/1144/1144760.svg"}
-                alt={c.author?.name || "Anonymous"}
-                width={24}
-                height={24}
-                className="object-cover"
-              />
-            </div>
-            <p className="text-gray-700 text-sm">
-              <span className="font-semibold">{c.author?.name || "Anonymous"}:</span> {c.content}
+      {/* Title & Content */}
+      <h2 className="text-2xl font-bold mb-2 text-gray-900 dark:text-gray-100">{blog.title}</h2>
+      <p className="text-gray-700 dark:text-gray-300 mb-4 line-clamp-3">{blog.content}</p>
+
+      {/* Like & Read More */}
+      <div className="flex items-center justify-between mb-4">
+        <button
+          onClick={handleLike}
+          className={`flex items-center gap-1 transition ${
+            likes.some((l) => l.id === currentUserId) ? "text-red-500" : "text-gray-600 dark:text-gray-300"
+          }`}
+        >
+          <Heart className="w-5 h-5" />
+          <span>{likes.length}</span>
+        </button>
+
+        <Link
+          href={`/blog/${blog.id}`}
+          className="text-blue-500 dark:text-blue-400 hover:underline font-medium text-sm"
+        >
+          Read More →
+        </Link>
+      </div>
+
+      {/* Comments */}
+      <div className="mt-2">
+        <p className="font-semibold text-gray-800 dark:text-gray-200 mb-2">Comments ({comments.length})</p>
+        {comments.slice(0, 2).map((c) => (
+          <div key={c.id} className="flex items-start gap-2 mb-2">
+            <Image
+              src={c.author?.image || fallbackImage}
+              alt={c.author?.name || "Anonymous"}
+              width={28}
+              height={28}
+              className="w-7 h-7 rounded-full object-cover border border-gray-300 dark:border-gray-600"
+            />
+            <p className="text-sm text-gray-700 dark:text-gray-300">
+              <span className="font-medium">{c.author?.name || "Anonymous"}:</span> {c.content}
             </p>
           </div>
         ))}
-        {comments.length > 2 && (
-          <Link href={`/blog/${blog.id}`} className="text-blue-500 text-sm hover:underline">
-            View all comments
-          </Link>
-        )}
+      </div>
+
+      {/* Add Comment */}
+      <div className="flex gap-2 mt-3">
+        <input
+          type="text"
+          placeholder="Add a comment..."
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          className="flex-1 border border-gray-300 dark:border-gray-600 rounded px-3 py-1 text-sm bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        />
+        <button
+          onClick={handleCommentSubmit}
+          className="bg-blue-500 dark:bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 dark:hover:bg-blue-700 transition"
+        >
+          Post
+        </button>
       </div>
     </div>
   );

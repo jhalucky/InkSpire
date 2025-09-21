@@ -6,12 +6,19 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 
-// Profile card component
-const ProfileCard = ({ session, refreshSession }: { session: any, refreshSession: () => void }) => {
+// --------------------
+// Profile Card Component
+// --------------------
+const ProfileCard = ({ session }: { session: any }) => {
   const user = session.user;
   const [imageUrl, setImageUrl] = useState(user.image);
 
-  // Function to render Twitter username
+  // Update image if session changes
+  useEffect(() => {
+    setImageUrl(user.image);
+  }, [user.image]);
+
+  // Render Twitter username
   const renderTwitterUsername = () => {
     if (!user.twitterUrl) return "Not Set";
     const username = user.twitterUrl.split("/").pop();
@@ -39,11 +46,6 @@ const ProfileCard = ({ session, refreshSession }: { session: any, refreshSession
       </div>
     );
   };
-
-  // Refresh image if session updates
-  useEffect(() => {
-    setImageUrl(session.user.image);
-  }, [session.user.image]);
 
   return (
     <div className="flex flex-col items-center p-8 bg-gray-900 text-white rounded-lg shadow-lg max-w-xl mx-auto my-12 relative">
@@ -79,9 +81,7 @@ const ProfileCard = ({ session, refreshSession }: { session: any, refreshSession
 
       {/* User Info */}
       <h2 className="text-2xl font-bold">{user.name || "User"}</h2>
-      <p className="text-gray-500 text-sm mt-1">
-        @{user.username || "Not Set"}
-      </p>
+      <p className="text-gray-500 text-sm mt-1">@{user.username || "Not Set"}</p>
 
       {/* Profile Details */}
       <div className="mt-6 w-full text-left space-y-2">
@@ -116,9 +116,19 @@ const ProfileCard = ({ session, refreshSession }: { session: any, refreshSession
   );
 };
 
+// --------------------
+// Profile Page
+// --------------------
 export default function ProfilePage() {
-  const { data: session, status, update } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (status === "authenticated" && !session) {
+      router.push("/");
+    }
+  }, [status, session, router]);
 
   if (status === "loading") {
     return (
@@ -128,15 +138,12 @@ export default function ProfilePage() {
     );
   }
 
-  if (!session) {
-    router.push("/");
-    return null;
-  }
+  if (!session) return null; // while redirecting
 
   return (
     <div className="flex flex-col items-center justify-center p-4 min-h-screen">
       <h1 className="text-3xl font-bold text-gray-800 mb-6">User Profile</h1>
-      <ProfileCard session={session} refreshSession={update} />
+      <ProfileCard session={session} />
     </div>
   );
 }
