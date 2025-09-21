@@ -6,7 +6,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Session } from "next-auth";
-import { renderTwitterUsername } from "./page";
 
 interface ProfileCardProps {
   session: Session;
@@ -19,6 +18,34 @@ const ProfileCard = ({ session }: ProfileCardProps) => {
   useEffect(() => {
     setImageUrl(user.image);
   }, [user.image]);
+
+  const renderTwitterUsername = () => {
+    if (!user?.twitterUrl) return "Not Set";
+    const username = user.twitterUrl.split("/").pop();
+    return (
+      <div className="flex items-center gap-2">
+        <svg
+          className="w-4 h-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M18.901 1.15391H21.393L14.07 9.38091L22.84 22.8399H15.93L10.978 15.6599L4.99201 22.8399H2.5L10.375 13.4359L1.93901 1.15391H9.08801L13.882 7.50291L18.901 1.15391ZM16.711 20.6589H18.236L7.75301 3.32391H6.12601L16.711 20.6589Z"
+            fill="currentColor"
+          />
+        </svg>
+        <a
+          href={user.twitterUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-400 hover:underline"
+        >
+          @{username}
+        </a>
+      </div>
+    );
+  };
 
   return (
     <div className="flex flex-col items-center p-8 bg-gray-900 text-white rounded-lg shadow-lg max-w-xl mx-auto my-12 relative">
@@ -65,7 +92,7 @@ const ProfileCard = ({ session }: ProfileCardProps) => {
         </div>
         <div>
           <span className="font-semibold text-gray-400">Twitter:</span>{" "}
-          {renderTwitterUsername(user)}
+          {renderTwitterUsername()}
         </div>
       </div>
       <div className="mt-8 flex flex-col w-full gap-2">
