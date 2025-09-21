@@ -7,7 +7,7 @@ import { Heart } from "lucide-react";
 
 const fallbackImage = "https://cdn-icons-png.flaticon.com/512/1144/1144760.png";
 
-type Blog = {
+export type Blog = {
   id: string;
   title: string;
   content: string;
