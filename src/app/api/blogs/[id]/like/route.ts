@@ -4,11 +4,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(
-  request: NextRequest,
-  context: { params: { id: string } }
-) {
-  const { id: blogId } = context.params;
+export const POST = async (request: NextRequest, context: { params: Promise<{ id: string }> }) => {
+  const { id: blogId } = await context.params; // await the params promise
 
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) {
@@ -38,4 +35,4 @@ export async function POST(
     console.error(err);
     return NextResponse.json({ error: "Failed to toggle like" }, { status: 500 });
   }
-}
+};
