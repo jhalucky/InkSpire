@@ -31,6 +31,18 @@ export default async function UserProfilePage({ params }: Props) {
 
   if (!user) return <p>User not found</p>;
 
+  // Extract Twitter handle from URL
+  let twitterHandle: string | null = null;
+  if (user.twitterUrl) {
+    try {
+      const url = new URL(user.twitterUrl);
+      twitterHandle = "@" + url.pathname.replace("/", "").replace(/\/$/, "");
+    } catch {
+      // fallback if invalid url
+      twitterHandle = null;
+    }
+  }
+
   return (
     <div className="max-w-4xl mx-auto p-6">
       {/* Profile Card */}
@@ -49,25 +61,25 @@ export default async function UserProfilePage({ params }: Props) {
             <p className="mt-2 text-gray-700 dark:text-gray-300">{user.bio}</p>
           )}
 
-          {/* Twitter Link */}
-          {user.twitterUrl && (
+          {/* Twitter/X Link */}
+          {user.twitterUrl && twitterHandle && (
             <a
-              href={user.twitterUrl || undefined} // fix null issue
+              href={user.twitterUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1 text-blue-500 mt-2 hover:underline"
             >
-              {/* Twitter SVG */}
+              {/* X (Twitter) SVG */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
+                viewBox="0 0 1200 1227"
                 width="20"
                 height="20"
                 fill="currentColor"
               >
-                <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53A4.48 4.48 0 0 0 22.43.36a9.09 9.09 0 0 1-2.88 1.1A4.52 4.52 0 0 0 16.5 0c-2.63 0-4.52 2.24-4.52 4.72 0 .37.04.73.11 1.07A12.94 12.94 0 0 1 3 1.67a4.72 4.72 0 0 0-.61 2.38c0 1.64.81 3.1 2.06 3.96a4.5 4.5 0 0 1-2.05-.58v.06c0 2.29 1.55 4.2 3.62 4.64a4.56 4.56 0 0 1-2.04.08c.58 1.87 2.25 3.23 4.24 3.27A9.06 9.06 0 0 1 0 19.54 12.8 12.8 0 0 0 6.92 21c8.3 0 12.85-7.1 12.85-13.26 0-.2 0-.39-.01-.58A9.35 9.35 0 0 0 23 3z" />
+                <path d="M714 519 1160 0H1050L660 450 333 0H0l460 650L0 1227h110l360-420 342 420h333L714 519zM864 1106 516 666 873 121h90L618 562l345 544h-99z"/>
               </svg>
-              <span>{user.twitterUrl || user.username}</span>
+              <span>{twitterHandle}</span>
             </a>
           )}
         </div>
