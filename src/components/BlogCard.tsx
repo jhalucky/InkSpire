@@ -122,7 +122,6 @@ const handleLike = async () => {
               className="w-7 h-7 rounded-full object-cover border border-gray-300 dark:border-gray-600"
             />
             </Link>
-
             
             <Link  href={`/user/${blog.author?.username}`}>
             <p className="text-sm text-gray-700 dark:text-gray-300">

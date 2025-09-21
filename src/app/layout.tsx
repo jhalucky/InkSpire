@@ -2,6 +2,7 @@
 
 import "./globals.css";
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next"
 import { Inter } from "next/font/google";
 import Navbar from "@/components/Navbar"; // Import the new Navbar
 import SessionProvider from "@/components/SessionProvider";
