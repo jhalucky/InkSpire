@@ -1,27 +1,25 @@
+// src/app/user/[username]/page.tsx
 import { prisma } from "@/lib/prisma";
-import BlogCard from "@/components/BlogCard";
+import BlogCard, { Blog } from "@/components/BlogCard";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import Image from "next/image";
 
-// Import Blog type from BlogCard
-import type { Blog } from "@/components/BlogCard";
-
 type Props = { params: { username: string } };
 
-// Extend Blog type to match what prisma returns
+// Extend Blog type from BlogCard with Prisma relations
 type BlogWithRelations = Blog & {
-  author: { id: string; name?: string; username?: string; image?: string } | null;
   likes: { id: string }[];
-  comments: { content: string; author: { name?: string; image?: string } }[];
+  comments: { content: string; author: { name?: string | null; image?: string | null } }[];
 };
 
+// Define user object type returned from Prisma
 type UserWithBlogs = {
   id: string;
-  name: string | null;
+  name?: string | null;
   username: string;
-  image: string | null;
-  bio: string | null;
+  image?: string | null;
+  bio?: string | null;
   twitterUrl?: string | null;
   blogs: BlogWithRelations[];
 };
@@ -29,6 +27,7 @@ type UserWithBlogs = {
 export default async function UserProfilePage({ params }: Props) {
   const { username } = params;
 
+  // Get current logged-in user ID
   const session = await getServerSession(authOptions);
   const currentUserId = session?.user?.id || "";
 
@@ -49,7 +48,7 @@ export default async function UserProfilePage({ params }: Props) {
 
   if (!user) return <p>User not found</p>;
 
-  // Extract Twitter handle
+  // Extract Twitter handle from URL
   let twitterHandle: string | null = null;
   if (user.twitterUrl) {
     try {
@@ -78,6 +77,7 @@ export default async function UserProfilePage({ params }: Props) {
             <p className="mt-2 text-gray-700 dark:text-gray-300">{user.bio}</p>
           )}
 
+          {/* Twitter/X Link */}
           {user.twitterUrl && twitterHandle && (
             <a
               href={user.twitterUrl}
