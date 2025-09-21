@@ -36,7 +36,7 @@ export default async function UserProfilePage({ params }: Props) {
       {/* Profile Card */}
       <div className="flex items-center gap-4 mb-8">
         <Image
-          src={user.image}
+          src={user.image || "/images/default-user.png"}
           alt={user.name || "Unknown User"}
           height={80}
           width={80}
