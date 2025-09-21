@@ -11,7 +11,7 @@ import { authOptions } from "@/lib/auth";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Blogging App",
+  title: "InkSpire",
   description: "A complete blogging website built with Next.js",
 };
 

@@ -67,15 +67,19 @@ const handleLike = async () => {
       
       {/* Author */}
       <div className="flex items-center gap-3 mb-4">
+        <Link  href={`/user/${blog.author?.username}`}>
         <Image
           src={blog.author?.image || fallbackImage}
           alt={blog.author?.name || "Unknown Author"}
           width={40}
           height={40}
-          className="w-10 h-10 rounded-full object-cover border border-gray-300 dark:border-gray-600"
+          className="w-10 h-10 rounded-full object-cover border border-gray-300 dark:border-gray-600 cursor-pointer"
         />
+        </Link>
+
+
         <div>
-          <p className="font-semibold text-gray-900 dark:text-gray-100">{blog.author?.name || "Unknown Author"}</p>
+          <Link  href={`/user/${blog.author?.username}`}><p className="font-semibold text-gray-900 dark:text-gray-100">{blog.author?.name || "Unknown Author"}</p></Link>
           <p className="text-sm text-gray-500 dark:text-gray-400">@{blog.author?.username || "unknown"}</p>
         </div>
       </div>
@@ -109,6 +113,7 @@ const handleLike = async () => {
         <p className="font-semibold text-gray-800 dark:text-gray-200 mb-2">Comments ({comments.length})</p>
         {comments.slice(0, 2).map((c) => (
           <div key={c.id} className="flex items-start gap-2 mb-2">
+            <Link  href={`/user/${blog.author?.username}`}>
             <Image
               src={c.author?.image || fallbackImage}
               alt={c.author?.name || "Anonymous"}
@@ -116,9 +121,14 @@ const handleLike = async () => {
               height={28}
               className="w-7 h-7 rounded-full object-cover border border-gray-300 dark:border-gray-600"
             />
+            </Link>
+
+            
+            <Link  href={`/user/${blog.author?.username}`}>
             <p className="text-sm text-gray-700 dark:text-gray-300">
               <span className="font-medium">{c.author?.name || "Anonymous"}:</span> {c.content}
             </p>
+            </Link>
           </div>
         ))}
       </div>
