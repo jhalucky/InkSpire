@@ -4,52 +4,24 @@ import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Session } from "next-auth";
+import { renderTwitterUsername } from "./page";
 
-// --------------------
-// Profile Card Component
-// --------------------
-const ProfileCard = ({ session }: { session: any }) => {
+interface ProfileCardProps {
+  session: Session;
+}
+
+const ProfileCard = ({ session }: ProfileCardProps) => {
   const user = session.user;
   const [imageUrl, setImageUrl] = useState(user.image);
 
-  // Update image if session changes
   useEffect(() => {
     setImageUrl(user.image);
   }, [user.image]);
 
-  // Render Twitter username
-  const renderTwitterUsername = () => {
-    if (!user.twitterUrl) return "Not Set";
-    const username = user.twitterUrl.split("/").pop();
-    return (
-      <div className="flex items-center gap-2">
-        <svg
-          className="w-4 h-4"
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M18.901 1.15391H21.393L14.07 9.38091L22.84 22.8399H15.93L10.978 15.6599L4.99201 22.8399H2.5L10.375 13.4359L1.93901 1.15391H9.08801L13.882 7.50291L18.901 1.15391ZM16.711 20.6589H18.236L7.75301 3.32391H6.12601L16.711 20.6589Z"
-            fill="currentColor"
-          />
-        </svg>
-        <a
-          href={user.twitterUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-400 hover:underline"
-        >
-          @{username}
-        </a>
-      </div>
-    );
-  };
-
   return (
     <div className="flex flex-col items-center p-8 bg-gray-900 text-white rounded-lg shadow-lg max-w-xl mx-auto my-12 relative">
-      {/* Edit Profile Button */}
       <Link href="/profile/setup" className="absolute top-4 right-4">
         <button className="text-gray-500 hover:text-white transition-colors">
           <svg
@@ -68,8 +40,6 @@ const ProfileCard = ({ session }: { session: any }) => {
           </svg>
         </button>
       </Link>
-
-      {/* Profile Image */}
       <div className="relative w-28 h-28 mb-4">
         <Image
           src={imageUrl || "https://placehold.co/112x112/FFFFFF/212121?text=N/A"}
@@ -78,12 +48,8 @@ const ProfileCard = ({ session }: { session: any }) => {
           className="rounded-full object-cover border-4 border-gray-700"
         />
       </div>
-
-      {/* User Info */}
       <h2 className="text-2xl font-bold">{user.name || "User"}</h2>
       <p className="text-gray-500 text-sm mt-1">@{user.username || "Not Set"}</p>
-
-      {/* Profile Details */}
       <div className="mt-6 w-full text-left space-y-2">
         <div>
           <span className="font-semibold text-gray-400">Bio:</span>{" "}
@@ -99,11 +65,9 @@ const ProfileCard = ({ session }: { session: any }) => {
         </div>
         <div>
           <span className="font-semibold text-gray-400">Twitter:</span>{" "}
-          {renderTwitterUsername()}
+          {renderTwitterUsername(user)}
         </div>
       </div>
-
-      {/* Action Buttons */}
       <div className="mt-8 flex flex-col w-full gap-2">
         <button
           onClick={() => signOut()}
@@ -116,14 +80,10 @@ const ProfileCard = ({ session }: { session: any }) => {
   );
 };
 
-// --------------------
-// Profile Page
-// --------------------
 export default function ProfilePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
-  // Redirect if not authenticated
   useEffect(() => {
     if (status === "authenticated" && !session) {
       router.push("/");
@@ -138,7 +98,7 @@ export default function ProfilePage() {
     );
   }
 
-  if (!session) return null; // while redirecting
+  if (!session) return null;
 
   return (
     <div className="flex flex-col items-center justify-center p-4 min-h-screen">
@@ -147,4 +107,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-
