@@ -1,6 +1,4 @@
-// src/lib/auth.ts
-
-import { PrismaAdapter } from "@auth/prisma-adapter";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { AuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
@@ -24,9 +22,9 @@ export const authOptions: AuthOptions = {
     error: "/api/auth/error",
   },
   session: {
-    strategy: "database", // ensures sessions are stored in PostgreSQL
+    strategy: "database",
   },
-  secret: process.env.NEXTAUTH_SECRET, // required for production
+  secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
     async session({ session, user }) {
       if (session?.user) {
