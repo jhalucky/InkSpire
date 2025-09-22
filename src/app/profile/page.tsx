@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState, ReactElement } from "react";
-import { Session } from "next-auth";
-import BlogCard from "@/components/BlogCard"; 
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 // ------------------ SOCIAL ICONS ------------------
 const socialSvgs: Record<string, ReactElement> = {
@@ -42,6 +42,38 @@ const socialSvgs: Record<string, ReactElement> = {
   ),
 };
 
+// ------------------ CONFIRM MODAL ------------------
+const ConfirmModal = ({
+  message,
+  onConfirm,
+  onCancel,
+}: {
+  message: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) => (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-sm w-full shadow-lg">
+      <h2 className="text-lg font-bold mb-4">Confirm Delete</h2>
+      <p className="mb-6">{message}</p>
+      <div className="flex justify-end gap-3">
+        <button
+          onClick={onCancel}
+          className="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded hover:bg-gray-400 dark:hover:bg-gray-600"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={onConfirm}
+          className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+);
+
 // ------------------ PROFILE CARD ------------------
 const extractUsername = (url: string | null | undefined) => {
   if (!url) return "Not Set";
@@ -49,12 +81,7 @@ const extractUsername = (url: string | null | undefined) => {
   return segments[segments.length - 1] ? `@${segments[segments.length - 1]}` : "Not Set";
 };
 
-interface ProfileCardProps {
-  session: Session;
-}
-
-// Profile card
-const ProfileCard = ({ session }: { session: Session }) => {
+const ProfileCard = ({ session }: { session: any }) => {
   const user = session.user;
   const [imageUrl, setImageUrl] = useState(user.image);
 
@@ -69,7 +96,12 @@ const ProfileCard = ({ session }: { session: Session }) => {
       <div className="flex items-center gap-2">
         {socialSvgs[type]}
         {isSet ? (
-          <a href={url!} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline cursor-pointer">
+          <a
+            href={url!}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-400 hover:underline cursor-pointer"
+          >
             {username}
           </a>
         ) : (
@@ -130,12 +162,65 @@ const ProfileCard = ({ session }: { session: Session }) => {
   );
 };
 
-// Profile page with user's own blogs
+// ------------------ PROFILE BLOG CARD ------------------
+const ProfileBlogCard = ({
+  blog,
+  currentUserId,
+  onDelete,
+}: {
+  blog: any;
+  currentUserId: string;
+  onDelete: (id: string) => void;
+}) => {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const toggleMenu = () => setMenuOpen(!menuOpen);
+
+  return (
+    <div className="relative border p-4 rounded shadow bg-white dark:bg-gray-800">
+      <div className="flex justify-between items-start">
+        <h3 className="font-bold text-lg">{blog.title}</h3>
+        {currentUserId === blog.authorId && (
+          <div className="relative">
+            <button
+              onClick={toggleMenu}
+              className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
+            >
+              ⋮
+            </button>
+            {menuOpen && (
+              <div className="absolute right-0 mt-2 w-32 bg-white dark:bg-gray-700 shadow-lg rounded border z-10">
+                <Link
+                  href={`/blog/edit/${blog.id}`}
+                  className="block w-full text-left px-4 py-2 hover:bg-gray-300 dark:hover:bg-gray-600"
+                >
+                  Edit
+                </Link>
+                <button
+                  onClick={() => onDelete(blog.id)}
+                  className="block w-full text-left px-4 py-2 hover:bg-red-600 hover:text-white"
+                >
+                  Delete
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+      <div className="mt-2 text-gray-700 dark:text-gray-200 prose max-w-full">
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>{blog.content}</ReactMarkdown>
+      </div>
+    </div>
+  );
+};
+
+// ------------------ PROFILE PAGE ------------------
 export default function ProfilePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [blogs, setBlogs] = useState<any[]>([]);
   const [loadingBlogs, setLoadingBlogs] = useState(true);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -143,11 +228,9 @@ export default function ProfilePage() {
     }
   }, [status, router]);
 
-  // Fetch blogs authored by the current user
   useEffect(() => {
     const fetchBlogs = async () => {
       if (!session?.user?.id) return;
-
       try {
         const res = await fetch(`/api/users/${session.user.id}/blogs`);
         if (!res.ok) {
@@ -164,9 +247,33 @@ export default function ProfilePage() {
         setLoadingBlogs(false);
       }
     };
-
     fetchBlogs();
   }, [session?.user?.id]);
+
+  const handleDeleteClick = (id: string) => {
+    setDeleteId(id);
+    setShowModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteId) return;
+    try {
+      const res = await fetch(`/api/blogs/${deleteId}`, { method: "DELETE" });
+      const data = await res.json();
+      if (data.success) setBlogs(blogs.filter((b) => b.id !== deleteId));
+      else console.error("Failed to delete blog");
+    } catch (err) {
+      console.error("Failed to delete blog", err);
+    } finally {
+      setShowModal(false);
+      setDeleteId(null);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setShowModal(false);
+    setDeleteId(null);
+  };
 
   if (status === "loading") {
     return (
@@ -190,11 +297,26 @@ export default function ProfilePage() {
         {loadingBlogs ? (
           <p className="text-center text-gray-500">Loading blogs...</p>
         ) : blogs.length > 0 ? (
-          blogs.map((blog) => <BlogCard key={blog.id} blog={blog} currentUserId={session.user.id} />)
+          blogs.map((blog) => (
+            <ProfileBlogCard
+              key={blog.id}
+              blog={blog}
+              currentUserId={session.user.id}
+              onDelete={handleDeleteClick}
+            />
+          ))
         ) : (
           <p className="text-gray-500">You haven’t written any blogs yet.</p>
         )}
       </div>
+
+      {showModal && (
+        <ConfirmModal
+          message="Are you sure you want to delete this blog?"
+          onConfirm={handleConfirmDelete}
+          onCancel={handleCancelDelete}
+        />
+      )}
     </>
   );
 }

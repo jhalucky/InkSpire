@@ -12,8 +12,7 @@ export async function GET(
       where: { authorId: id },
       include: {
         author: true,
-        likes: true,
-        comments: { include: { author: true } },
+        _count: { select: { likes: true, comments: true } },
       },
       orderBy: { createdAt: "desc" },
     });
