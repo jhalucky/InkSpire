@@ -1,3 +1,4 @@
+// src/app/user/[username]/page.tsx
 import { prisma } from "@/lib/prisma";
 import BlogCard from "@/components/BlogCard";
 import { getServerSession } from "next-auth";
@@ -6,19 +7,8 @@ import Image from "next/image";
 
 type Props = { params: { username: string } };
 
-type BlogForCard = {
-  id: string;
-  title: string;
-  content: string;
-  author: { name?: string | null; username?: string | null; image?: string | null } | null;
-  likes?: { id: string }[];
-  comments?: { id: string; content: string; author: { name?: string | null; image?: string | null } }[];
-};
-
-
 export default async function UserProfilePage({ params }: Props) {
   const { username } = params;
-
   const session = await getServerSession(authOptions);
   const currentUserId = session?.user?.id ?? "";
 
@@ -38,15 +28,13 @@ export default async function UserProfilePage({ params }: Props) {
 
   if (!user) return <p>User not found</p>;
 
-  // Twitter handle
+  // Twitter handle extraction
   let twitterHandle: string | null = null;
   if (user.twitterUrl) {
     try {
       const url = new URL(user.twitterUrl);
       twitterHandle = "@" + url.pathname.replace("/", "").replace(/\/$/, "");
-    } catch {
-      twitterHandle = null;
-    }
+    } catch {}
   }
 
   return (
@@ -91,7 +79,7 @@ export default async function UserProfilePage({ params }: Props) {
         {user.blogs.length === 0 ? (
           <p className="text-gray-700 dark:text-gray-300">No blogs yet.</p>
         ) : (
-          user.blogs.map((blog: BlogForCard) => (
+          user.blogs.map((blog) => (
             <BlogCard key={blog.id} blog={blog} currentUserId={currentUserId} />
           ))
         )}

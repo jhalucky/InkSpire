@@ -3,7 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { Heart } from "lucide-react";
+import { Heart, MoreVertical } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const fallbackImage = "https://cdn-icons-png.flaticon.com/512/1144/1144760.png";
 
@@ -11,9 +12,14 @@ type Blog = {
   id: string;
   title: string;
   content: string;
+  authorId?: string;
   author: { name?: string | null; username?: string | null; image?: string | null } | null;
   likes?: { id: string }[];
-  comments?: { id: string; content: string; author: { name?: string | null; image?: string | null } }[];
+  comments?: {
+    id: string;
+    content: string;
+    author: { name?: string | null; image?: string | null };
+  }[];
 };
 
 export default function BlogCard({
@@ -23,9 +29,11 @@ export default function BlogCard({
   blog: Blog;
   currentUserId: string;
 }) {
+  const router = useRouter();
   const [comment, setComment] = useState("");
   const [comments, setComments] = useState(blog.comments ?? []);
   const [likes, setLikes] = useState(blog.likes ?? []);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   // Post a comment
   const handleCommentSubmit = async () => {
@@ -58,8 +66,50 @@ export default function BlogCard({
     }
   };
 
+  // Delete blog
+  const handleDelete = async () => {
+    if (!confirm("Are you sure you want to delete this blog?")) return;
+    try {
+      const res = await fetch(`/api/blogs/${blog.id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete blog");
+      router.refresh();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Edit blog
+  const handleEdit = () => {
+    router.push(`/blog/create?id=${blog.id}`); // redirect to same page with query param
+  };
+
   return (
-    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg p-6 mb-6 transition-transform hover:scale-[1.01]">
+    <div className="relative bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg p-6 mb-6 transition-transform hover:scale-[1.01]">
+      {/* Three-dot menu for blog owner */}
+      {currentUserId === blog.authorId && (
+        <div className="absolute top-3 right-3">
+          <button onClick={() => setMenuOpen(!menuOpen)}>
+            <MoreVertical className="w-5 h-5 text-gray-500 dark:text-gray-300" />
+          </button>
+          {menuOpen && (
+            <div className="absolute right-0 mt-2 w-28 bg-white dark:bg-gray-700 shadow-lg rounded-md text-sm">
+              <button
+                onClick={handleEdit}
+                className="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-600"
+              >
+                Edit
+              </button>
+              <button
+                onClick={handleDelete}
+                className="w-full text-left px-3 py-2 text-red-500 hover:bg-gray-100 dark:hover:bg-gray-600"
+              >
+                Delete
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Author */}
       <div className="flex items-center gap-3 mb-4">
         <Link href={`/user/${blog.author?.username ?? ""}`}>
