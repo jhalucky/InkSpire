@@ -1,9 +1,41 @@
+// src/lib/auth.ts
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import { AuthOptions } from "next-auth";
+import { AuthOptions, Session } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import { prisma } from "./prisma";
-import { Session } from "next-auth";
+
+// Define a type-safe user for session
+type SafeUser = {
+  id: string;
+  name: string;           // Never null
+  email: string;
+  image: string;          // Never null
+  username: string;
+  bio: string;
+  profession: string;
+  education: string;
+  twitterUrl: string;
+  instagramUrl: string;
+  linkedinUrl: string;
+  githubUrl: string;
+};
+
+// Default fallback values
+const DEFAULT_USER: SafeUser = {
+  id: "",
+  name: "User",
+  email: "",
+  image: "https://placehold.co/112x112/FFFFFF/212121?text=N/A",
+  username: "Not Set",
+  bio: "Not Set",
+  profession: "Not Set",
+  education: "Not Set",
+  twitterUrl: "",
+  instagramUrl: "",
+  linkedinUrl: "",
+  githubUrl: "",
+};
 
 export const authOptions: AuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -39,18 +71,18 @@ export const authOptions: AuthOptions = {
             twitterUrl: true,
             instagramUrl: true,
             linkedinUrl: true,
-            githubUrl: true
+            githubUrl: true,
           },
         });
-        
+
+        // Merge with safe defaults
         session.user = {
-          ...session.user,
+          ...DEFAULT_USER,
           ...fullUser,
-        };
+        } as SafeUser;
       }
+
       return session;
     },
-    // The custom signIn callback is removed to allow NextAuth.js
-    // to handle new user creation automatically with the Prisma adapter.
   },
 };
