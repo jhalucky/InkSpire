@@ -24,9 +24,9 @@ model User {
   education        String?
   missionstatement String?
   twitterUrl       String?    
-  instagramUrl        String?
-  linkedinUrl         String?
-  githubUrl           String?
+  instagramUrl     String?
+  linkedinUrl      String?
+  githubUrl        String?
 
   // NextAuth relations
   accounts         Account[]
