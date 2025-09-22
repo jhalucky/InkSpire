@@ -39,6 +39,12 @@ export default function ProfileSetupPage() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
+if (!username.trim()) {
+  setError("Enter a unique username");
+  setLoading(false);
+  return;
+}
+
     e.preventDefault();
     setLoading(true);
     setError("");
