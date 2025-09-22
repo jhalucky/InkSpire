@@ -65,7 +65,7 @@ export default async function UserProfilePage({ params }: Props) {
           <div className="flex flex-wrap gap-3 mt-3">
             {twitterHandle && (
               <a
-                href={user.twitterUrl}
+                href={user.twitterUrl ?? undefined}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-1 text-blue-500 hover:underline"
@@ -80,7 +80,7 @@ export default async function UserProfilePage({ params }: Props) {
 
             {instagramHandle && (
               <a
-                href={user.instagramUrl}
+                href={user.instagramUrl ?? undefined}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-1 text-pink-500 hover:underline"
@@ -95,7 +95,7 @@ export default async function UserProfilePage({ params }: Props) {
 
             {linkedinHandle && (
               <a
-                href={user.linkedinUrl}
+                href={user.linkedinUrl ?? undefined}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-1 text-blue-700 hover:underline"
@@ -110,7 +110,7 @@ export default async function UserProfilePage({ params }: Props) {
 
             {githubHandle && (
               <a
-                href={user.githubUrl}
+                href={user.githubUrl ?? undefined}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-1 text-gray-800 dark:text-gray-200 hover:underline"
