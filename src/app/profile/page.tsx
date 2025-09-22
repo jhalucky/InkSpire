@@ -6,9 +6,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Session } from "next-auth";
+import React, { ReactElement } from "react";
 
 // Social icons as JSX
-const socialSvgs: Record<string, JSX.Element> = {
+const socialSvgs: Record<string, ReactElement> = {
 twitter: (
   <svg
    
