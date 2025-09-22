@@ -1,37 +1,57 @@
-import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { NextRequest, NextResponse } from "next/server";
 
-// Next.js 15 App Router expects params as a Promise
-type ParamsContext = { params: Promise<{ id: string }> };
+// GET single blog by id
+export async function GET(req: NextRequest, context: { params: Promise<{ id: string }> }) {
+  try {
+    const { id } = await context.params;
 
-export async function GET(req: NextRequest, context: ParamsContext) {
-  const { id } = await context.params; // <--- await the promise
-  const blog = await prisma.blog.findUnique({
-    where: { id },
-    include: { author: true, likes: true, comments: { include: { author: true } } },
-  });
+    const blog = await prisma.blog.findUnique({
+      where: { id },
+      include: {
+        author: true,
+        likes: true,
+        comments: { include: { author: true } },
+      },
+    });
 
-  if (!blog)
-    return NextResponse.json({ error: "Blog not found" }, { status: 404 });
+    if (!blog) return NextResponse.json({ error: "Blog not found" }, { status: 404 });
 
-  return NextResponse.json(blog);
+    return NextResponse.json(blog);
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ error: "Failed to fetch blog" }, { status: 500 });
+  }
 }
 
-export async function PUT(req: NextRequest, context: ParamsContext) {
-  const { id } = await context.params;
-  const data = await req.json();
+// PUT update blog by id
+export async function PUT(req: NextRequest, context: { params: Promise<{ id: string }> }) {
+  try {
+    const { id } = await context.params;
+    const { title, content } = await req.json();
 
-  const updatedBlog = await prisma.blog.update({
-    where: { id },
-    data,
-  });
+    const updated = await prisma.blog.update({
+      where: { id },
+      data: { title, content },
+    });
 
-  return NextResponse.json(updatedBlog);
+    return NextResponse.json(updated);
+  } catch (err: any) {
+    console.error(err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
 }
 
-export async function DELETE(req: NextRequest, context: ParamsContext) {
-  const { id } = await context.params;
+// DELETE blog by id
+export async function DELETE(req: NextRequest, context: { params: Promise<{ id: string }> }) {
+  try {
+    const { id } = await context.params;
 
-  await prisma.blog.delete({ where: { id } });
-  return NextResponse.json({ message: "Deleted successfully" });
+    await prisma.blog.delete({ where: { id } });
+
+    return NextResponse.json({ message: "Blog deleted" });
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ error: "Failed to delete blog" }, { status: 500 });
+  }
 }

@@ -1,18 +1,17 @@
 import { prisma } from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
-  const { id } = params;
-
+// GET all blogs by a specific user
+export async function GET(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await context.params;
+
     const blogs = await prisma.blog.findMany({
       where: { authorId: id },
       include: {
         author: true,
-        _count: { select: { likes: true, comments: true } },
+        likes: true,
+        comments: { include: { author: true } },
       },
       orderBy: { createdAt: "desc" },
     });
@@ -20,9 +19,7 @@ export async function GET(
     return NextResponse.json(blogs);
   } catch (err) {
     console.error(err);
-    return NextResponse.json(
-      { error: "Failed to fetch user blogs" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch user's blogs" }, { status: 500 });
   }
 }
+
