@@ -2,25 +2,43 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 
 export default function ProfileSetupPage() {
   const { data: session, status, update } = useSession();
   const router = useRouter();
 
-  const [username, setUsername] = useState(session?.user?.username || "");
-  const [bio, setBio] = useState(session?.user?.bio || "");
-  const [profession, setProfession] = useState(session?.user?.profession || "");
-  const [education, setEducation] = useState(session?.user?.education || "");
-  const [twitterUrl, setTwitterUrl] = useState(session?.user?.twitterUrl || "");
-  const [linkedinUrl, setLinkedinUrl] = useState(session?.user?.linkedinUrl || "");
-  const [githubUrl, setGithubUrl] = useState(session?.user?.githubUrl || "");
-  const [instagramUrl, setInstagramUrl] = useState(session?.user?.instagramUrl || "");
+  // Form state
+  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
+  const [bio, setBio] = useState("");
+  const [profession, setProfession] = useState("");
+  const [education, setEducation] = useState("");
+  const [twitterUrl, setTwitterUrl] = useState("");
+  const [linkedinUrl, setLinkedinUrl] = useState("");
+  const [githubUrl, setGithubUrl] = useState("");
+  const [instagramUrl, setInstagramUrl] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Prefill form from session.user
+  useEffect(() => {
+    if (session?.user) {
+      setName(session.user.name || "");
+      setUsername(session.user.username || "");
+      setBio(session.user.bio || "");
+      setProfession(session.user.profession || "");
+      setEducation(session.user.education || "");
+      setTwitterUrl(session.user.twitterUrl || "");
+      setLinkedinUrl(session.user.linkedinUrl || "");
+      setGithubUrl(session.user.githubUrl || "");
+      setInstagramUrl(session.user.instagramUrl || "");
+      setImagePreview(session.user.image || null);
+    }
+  }, [session?.user]);
 
   if (status === "loading") {
     return (
@@ -39,27 +57,28 @@ export default function ProfileSetupPage() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-if (!username.trim()) {
-  setError("Enter a unique username");
-  setLoading(false);
-  return;
-}
-
     e.preventDefault();
     setLoading(true);
     setError("");
 
+    if (!name.trim() || !username.trim()) {
+      setError("Name and username are required");
+      setLoading(false);
+      return;
+    }
+
     try {
       let imageUrl = session?.user?.image;
 
+      // Upload image to Cloudinary if new image selected
       const cloudinaryCloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
       const cloudinaryUploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 
-      if (!cloudinaryCloudName || !cloudinaryUploadPreset) {
-        throw new Error("Cloudinary cloud name or upload preset is not set in .env");
-      }
-
       if (imageFile) {
+        if (!cloudinaryCloudName || !cloudinaryUploadPreset) {
+          throw new Error("Cloudinary cloud name or upload preset is not set");
+        }
+
         const formData = new FormData();
         formData.append("file", imageFile);
         formData.append("upload_preset", cloudinaryUploadPreset);
@@ -70,18 +89,20 @@ if (!username.trim()) {
         );
 
         if (!uploadRes.ok) {
-          const errorData = await uploadRes.json();
-          throw new Error(errorData.error?.message || "Image upload failed.");
+          const errData = await uploadRes.json();
+          throw new Error(errData.error?.message || "Image upload failed");
         }
 
         const uploadData = await uploadRes.json();
         imageUrl = uploadData.secure_url;
       }
 
+      // Send updated data to backend
       const res = await fetch("/api/profile/setup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          name,
           username,
           bio,
           profession,
@@ -95,10 +116,11 @@ if (!username.trim()) {
       });
 
       if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || "Something went wrong.");
+        const errData = await res.json();
+        throw new Error(errData.error || "Failed to update profile");
       }
 
+      // Update session so new values show immediately
       await update();
       router.push("/profile");
     } catch (err: any) {
@@ -108,9 +130,7 @@ if (!username.trim()) {
     }
   };
 
-  const handleCancel = () => {
-    router.push("/profile");
-  };
+  const handleCancel = () => router.push("/profile");
 
   return (
     <div className="flex flex-col items-center p-8 bg-gray-900 text-white rounded-lg shadow-lg max-w-md mx-auto my-12">
@@ -150,13 +170,27 @@ if (!username.trim()) {
           <input
             id="avatar-upload"
             type="file"
-            accept=".png, .jpeg, .jpg"
+            accept=".png,.jpeg,.jpg"
             onChange={handleImageChange}
             className="hidden"
           />
         </div>
 
-        {/* Text Fields */}
+        {/* Name */}
+        <div>
+          <label htmlFor="name" className="block text-gray-400 mb-1">Name</label>
+          <input
+            type="text"
+            id="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full p-2 rounded-md bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Your full name"
+            required
+          />
+        </div>
+
+        {/* Username */}
         <div>
           <label htmlFor="username" className="block text-gray-400 mb-1">Username</label>
           <input
@@ -165,11 +199,12 @@ if (!username.trim()) {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             className="w-full p-2 rounded-md bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
             placeholder="Choose a unique username"
+            required
           />
         </div>
 
+        {/* Bio */}
         <div>
           <label htmlFor="bio" className="block text-gray-400 mb-1">Bio</label>
           <textarea
@@ -182,6 +217,7 @@ if (!username.trim()) {
           />
         </div>
 
+        {/* Profession */}
         <div>
           <label htmlFor="profession" className="block text-gray-400 mb-1">Profession</label>
           <input
@@ -194,6 +230,7 @@ if (!username.trim()) {
           />
         </div>
 
+        {/* Education */}
         <div>
           <label htmlFor="education" className="block text-gray-400 mb-1">Education</label>
           <input
@@ -264,7 +301,6 @@ if (!username.trim()) {
           >
             {loading ? "Saving..." : "Save Changes"}
           </button>
-
           <button
             type="button"
             className="flex-1 flex items-center justify-center gap-2 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded"
