@@ -37,6 +37,9 @@ export const authOptions: AuthOptions = {
             profession: true,
             education: true,
             twitterUrl: true,
+            instagramUrl: true,
+            linkedinUrl: true,
+            githubUrl: true
           },
         });
         

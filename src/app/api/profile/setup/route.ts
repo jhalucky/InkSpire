@@ -4,7 +4,6 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(req: Request) {
-  // Get the user's session
   const session = await getServerSession(authOptions);
 
   if (!session) {
@@ -13,23 +12,28 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { username, bio, profession, education, twitterUrl } = body;
+    const {
+      username,
+      bio,
+      profession,
+      education,
+      twitterUrl,
+      linkedinUrl,
+      githubUrl,
+      instagramUrl,
+      image,
+    } = body;
 
-    // Validate the required fields
     if (!username) {
       return NextResponse.json({ error: "Username is required" }, { status: 400 });
     }
-    
-    // Check if the username is already taken
-    const existingUser = await prisma.user.findUnique({
-      where: { username },
-    });
 
+    // Check if the username is already taken
+    const existingUser = await prisma.user.findUnique({ where: { username } });
     if (existingUser && existingUser.id !== session.user.id) {
       return NextResponse.json({ error: "Username is already taken" }, { status: 409 });
     }
 
-    // Update the user in the database and return the updated user object
     const updatedUser = await prisma.user.update({
       where: { id: session.user.id },
       data: {
@@ -38,6 +42,10 @@ export async function POST(req: Request) {
         profession,
         education,
         twitterUrl,
+        linkedinUrl,
+        githubUrl,
+        instagramUrl,
+        image,
       },
       select: {
         id: true,
@@ -49,10 +57,12 @@ export async function POST(req: Request) {
         profession: true,
         education: true,
         twitterUrl: true,
+        linkedinUrl: true,
+        githubUrl: true,
+        instagramUrl: true,
       },
     });
 
-    // Return the updated user data
     return NextResponse.json({ message: "Profile updated successfully", user: updatedUser });
   } catch (err) {
     console.error(err);
