@@ -10,7 +10,7 @@ export default function Navbar() {
   const router = useRouter();
 
   return (
-    <nav className="flex items-center justify-between p-4 bg-gray-800 text-white">
+    <nav className="flex items-center justify-between p-4 text-white">
       <div className="flex items-center">
         <Link href="/">
           <span className="text-xl font-bold cursor-pointer">Inkspire</span>
