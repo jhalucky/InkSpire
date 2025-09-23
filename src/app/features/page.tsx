@@ -15,7 +15,9 @@ import {
   Eye,
   Zap,
   Target,
-  Award
+  Award,
+  Mail,
+  Palette
 } from "lucide-react";
 import AIWritingAssistant from "@/components/AIWritingAssistant";
 import ReadingModes from "@/components/ReadingModes";
