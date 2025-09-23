@@ -13,9 +13,16 @@ interface ProfileBlogCardProps {
       comments: number;
     };
   };
+  currentUserId: string;
+  onDelete: (id: string) => void;
 }
 
-export default function ProfileBlogCard({ blog }: ProfileBlogCardProps) {
+
+export default function ProfileBlogCard({
+  blog,
+  currentUserId,
+  onDelete,
+}: ProfileBlogCardProps) {
   const formattedDate = blog.createdAt
     ? format(new Date(blog.createdAt), "dd MMM yyyy, hh:mm a")
     : "";
@@ -27,11 +34,20 @@ export default function ProfileBlogCard({ blog }: ProfileBlogCardProps) {
       </h2>
       <p className="mb-4 text-gray-700 dark:text-gray-300">{blog.content}</p>
 
-      <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400">
+      <div className="flex justify-between items-center text-sm text-gray-500 dark:text-gray-400">
         <span>❤️ {blog._count?.likes ?? 0} Likes</span>
         <span>💬 {blog._count?.comments ?? 0} Comments</span>
         <span>{formattedDate}</span>
+        {currentUserId && (
+          <button
+            onClick={() => onDelete(blog.id)}
+            className="ml-4 text-red-600 hover:underline"
+          >
+            Delete
+          </button>
+        )}
       </div>
     </div>
   );
 }
+
