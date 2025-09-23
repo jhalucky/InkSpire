@@ -16,21 +16,21 @@ interface ProfileBlogCardProps {
 }
 
 export default function ProfileBlogCard({ blog }: ProfileBlogCardProps) {
+  const formattedDate = blog.createdAt
+    ? format(new Date(blog.createdAt), "dd MMM yyyy, hh:mm a")
+    : "";
+
   return (
-    <div className="p-6 rounded-xl shadow-md bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 mb-2">
-      <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+    <div className="p-6 mb-4 rounded-xl border border-gray-200 bg-white shadow-md dark:border-gray-700 dark:bg-gray-900">
+      <h2 className="mb-2 text-xl font-semibold text-gray-900 dark:text-gray-100">
         {blog.title}
       </h2>
-      <p className="mt-2 text-gray-700 dark:text-gray-300">{blog.content}</p>
+      <p className="mb-4 text-gray-700 dark:text-gray-300">{blog.content}</p>
 
-      <div className="mt-4 flex justify-between text-sm text-gray-500 dark:text-gray-400">
-        <span>❤️ {blog._count?.likes || 0} Likes</span>
-        <span>💬 {blog._count?.comments || 0} Comments</span>
-        <span>
-          {blog.createdAt
-            ? format(new Date(blog.createdAt), "dd MMM yyyy, hh:mm a")
-            : ""}
-        </span>
+      <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400">
+        <span>❤️ {blog._count?.likes ?? 0} Likes</span>
+        <span>💬 {blog._count?.comments ?? 0} Comments</span>
+        <span>{formattedDate}</span>
       </div>
     </div>
   );
