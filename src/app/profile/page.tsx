@@ -162,12 +162,6 @@ const ProfileCard = ({ session }: { session: any }) => {
   );
 };
 
-// ------------------ PROFILE BLOG CARD ------------------
-{/* <SessionProvider session={session}>
-  <ProfileBlogCard />
-</SessionProvider> */}
-
-
 // ------------------ PROFILE PAGE ------------------
 export default function ProfilePage() {
   const { data: session, status } = useSession();
@@ -177,22 +171,18 @@ export default function ProfilePage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
 
+  // Redirect if not authenticated
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/signin");
-    }
+    if (status === "unauthenticated") router.push("/signin");
   }, [status, router]);
 
+  // Fetch blogs
   useEffect(() => {
     const fetchBlogs = async () => {
       if (!session?.user?.id) return;
       try {
         const res = await fetch(`/api/users/${session.user.id}/blogs`);
-        if (!res.ok) {
-          console.error("Failed to fetch user blogs", res.status);
-          setBlogs([]);
-          return;
-        }
+        if (!res.ok) throw new Error("Failed to fetch blogs");
         const data = await res.json();
         setBlogs(data);
       } catch (err) {
@@ -205,6 +195,7 @@ export default function ProfilePage() {
     fetchBlogs();
   }, [session?.user?.id]);
 
+  // Delete blog
   const handleDeleteClick = (id: string) => {
     setDeleteId(id);
     setShowModal(true);
@@ -216,71 +207,59 @@ export default function ProfilePage() {
       const res = await fetch(`/api/blogs/${deleteId}`, { method: "DELETE" });
       const data = await res.json();
       if (data.success) setBlogs(blogs.filter((b) => b.id !== deleteId));
-      else console.error("Failed to delete blog");
     } catch (err) {
-      console.error("Failed to delete blog", err);
+      console.error(err);
     } finally {
-      setShowModal(false);
       setDeleteId(null);
+      setShowModal(false);
     }
   };
 
   const handleCancelDelete = () => {
-    setShowModal(false);
     setDeleteId(null);
+    setShowModal(false);
   };
 
-  if (status === "loading") {
+  if (status === "loading" || !session) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <p>Loading...</p>
       </div>
     );
   }
+
   return (
     <SessionProvider session={session}>
       <div className="p-8">
         <ProfileCard session={session} />
-        <ProfileBlogCard blogs={blogs} loading={loadingBlogs} />
+
+        <div className="max-w-3xl mx-auto mt-10 space-y-6">
+          <h2 className="text-2xl font-semibold text-gray-800">Your Blogs</h2>
+
+          {loadingBlogs ? (
+            <p className="text-center text-gray-500">Loading blogs...</p>
+          ) : blogs.length > 0 ? (
+            blogs.map((blog) => (
+              <ProfileBlogCard
+                key={blog.id}
+                blog={blog}
+                currentUserId={session.user.id}
+                onDelete={handleDeleteClick}
+              />
+            ))
+          ) : (
+            <p className="text-gray-500">You haven’t written any blogs yet.</p>
+          )}
+        </div>
+
+        {showModal && (
+          <ConfirmModal
+            message="Are you sure you want to delete this blog?"
+            onConfirm={handleConfirmDelete}
+            onCancel={handleCancelDelete}
+          />
+        )}
       </div>
     </SessionProvider>
   );
 }
-
-  if (!session) return null;
-
-  return (
-    <>
-      <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center mt-3">User Profile</h1>
-      <ProfileCard session={session} />
-
-      {/* User's Blogs */}
-      <div className="max-w-3xl mx-auto mt-10 space-y-6">
-        <h2 className="text-2xl font-semibold text-gray-800">Your Blogs</h2>
-
-        {loadingBlogs ? (
-          <p className="text-center text-gray-500">Loading blogs...</p>
-        ) : blogs.length > 0 ? (
-          blogs.map((blog) => (
-            <ProfileBlogCard
-              key={blog.id}
-              blog={blog}
-              currentUserId={session.user.id}
-              onDelete={handleDeleteClick}
-            />
-          ))
-        ) : (
-          <p className="text-gray-500">You haven’t written any blogs yet.</p>
-        )}
-      </div>
-
-      {showModal && (
-        <ConfirmModal
-          message="Are you sure you want to delete this blog?"
-          onConfirm={handleConfirmDelete}
-          onCancel={handleCancelDelete}
-        />
-      )}
-    </>
-  );
-
