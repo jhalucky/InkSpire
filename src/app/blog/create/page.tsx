@@ -3,6 +3,9 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import AIWritingAssistant from "@/components/AIWritingAssistant";
+import SocialSnippets from "@/components/SocialSnippets";
+import AICoverImageGenerator from "@/components/AICoverImageGenerator";
 
 export default function CreateBlogPage({ blog }: { blog?: any }) {
   const { data: session } = useSession();
@@ -12,6 +15,7 @@ export default function CreateBlogPage({ blog }: { blog?: any }) {
   const [content, setContent] = useState(blog?.content || "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [coverImage, setCoverImage] = useState(blog?.coverImage || "");
 
   if (!session) {
     router.push("/signin");
@@ -63,49 +67,169 @@ export default function CreateBlogPage({ blog }: { blog?: any }) {
   };
 
   return (
-    <div className="max-w-3xl mx-auto my-12 p-6 bg-gray-900 text-white rounded-lg shadow-lg">
-      <h1 className="text-3xl font-bold mb-6">{blog ? "Edit Blog" : "Write a Blog"}</h1>
-      {error && <p className="text-red-500 mb-4">{error}</p>}
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-gray-400 mb-1">Title</label>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-            className="w-full p-2 rounded-md bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Enter your blog title"
-          />
+    <div className="max-w-4xl mx-auto">
+      <div className="bg-card border border-border rounded-xl shadow-sm">
+        <div className="p-6 border-b border-border">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+            {blog ? "Edit Blog" : "Write a Blog"}
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            {blog ? "Update your story" : "Share your thoughts with the world"}
+          </p>
         </div>
-        <div>
-          <label className="block text-gray-400 mb-1">Content</label>
-          {/* Toolbar */}
-          <div className="flex gap-2 mb-2">
-            <button type="button" onClick={() => applyFormat("**")} className="px-2 py-1 bg-gray-700 rounded">B</button>
-            <button type="button" onClick={() => applyFormat("*")} className="px-2 py-1 bg-gray-700 rounded italic">I</button>
-            <button type="button" onClick={() => applyFormat("~~")} className="px-2 py-1 bg-gray-700 rounded">S</button>
-            <button type="button" onClick={() => applyFormat("# ", "")} className="px-2 py-1 bg-gray-700 rounded">H1</button>
-            <button type="button" onClick={() => applyFormat("## ", "")} className="px-2 py-1 bg-gray-700 rounded">H2</button>
-          </div>
-          <textarea
-            id="content"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            required
-            rows={10}
-            className="w-full p-2 rounded-md bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Write your blog here..."
-          />
+
+        <div className="p-6">
+          {error && (
+            <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+              <p className="text-destructive text-sm">{error}</p>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Title
+              </label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+                className="w-full px-4 py-3 rounded-lg bg-background border border-input focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent text-foreground placeholder:text-muted-foreground"
+                placeholder="Enter your blog title"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Content
+              </label>
+              
+              {/* Enhanced Toolbar */}
+              <div className="flex flex-wrap gap-2 mb-3 p-3 bg-muted/50 rounded-lg border border-border">
+                <button 
+                  type="button" 
+                  onClick={() => applyFormat("**")} 
+                  className="px-3 py-2 bg-background border border-input rounded-md text-sm font-medium hover:bg-accent transition-colors"
+                >
+                  <strong>B</strong>
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => applyFormat("*")} 
+                  className="px-3 py-2 bg-background border border-input rounded-md text-sm font-medium italic hover:bg-accent transition-colors"
+                >
+                  <em>I</em>
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => applyFormat("~~")} 
+                  className="px-3 py-2 bg-background border border-input rounded-md text-sm font-medium hover:bg-accent transition-colors"
+                >
+                  <s>S</s>
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => applyFormat("# ", "")} 
+                  className="px-3 py-2 bg-background border border-input rounded-md text-sm font-medium hover:bg-accent transition-colors"
+                >
+                  H1
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => applyFormat("## ", "")} 
+                  className="px-3 py-2 bg-background border border-input rounded-md text-sm font-medium hover:bg-accent transition-colors"
+                >
+                  H2
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => applyFormat("### ", "")} 
+                  className="px-3 py-2 bg-background border border-input rounded-md text-sm font-medium hover:bg-accent transition-colors"
+                >
+                  H3
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => applyFormat("> ", "")} 
+                  className="px-3 py-2 bg-background border border-input rounded-md text-sm font-medium hover:bg-accent transition-colors"
+                >
+                  Quote
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => applyFormat("- ", "")} 
+                  className="px-3 py-2 bg-background border border-input rounded-md text-sm font-medium hover:bg-accent transition-colors"
+                >
+                  List
+                </button>
+              </div>
+
+              <textarea
+                id="content"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                required
+                rows={15}
+                className="w-full px-4 py-3 rounded-lg bg-background border border-input focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent text-foreground placeholder:text-muted-foreground resize-none"
+                placeholder="Write your blog here... Use the toolbar above to format your text with markdown."
+              />
+              
+              <div className="mt-2 text-xs text-muted-foreground">
+                {content.length} characters
+              </div>
+            </div>
+
+            {/* AI Writing Assistant */}
+            <AIWritingAssistant 
+              content={content}
+              title={title}
+              onSuggestionApply={(suggestion) => {
+                // Apply suggestion to content
+                setContent(prev => prev + '\n\n' + suggestion);
+              }}
+            />
+
+            {/* AI Cover Image Generator */}
+            {title && (
+              <AICoverImageGenerator
+                title={title}
+                content={content}
+                onImageGenerated={(imageUrl) => setCoverImage(imageUrl)}
+              />
+            )}
+
+            {/* Social Media Snippets */}
+            {title && content && (
+              <SocialSnippets
+                title={title}
+                content={content}
+                authorName={session?.user?.name || "Author"}
+                authorUsername={session?.user?.username || "author"}
+                blogUrl={`https://inkspire.com/blog/${blog?.id || 'new'}`}
+              />
+            )}
+
+            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+              <button
+                type="submit"
+                disabled={loading}
+                className="flex-1 sm:flex-none sm:px-8 py-3 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? "Saving..." : blog ? "Update Blog" : "Publish Blog"}
+              </button>
+              
+              <button
+                type="button"
+                className="flex-1 sm:flex-none sm:px-8 py-3 bg-muted text-muted-foreground font-semibold rounded-lg hover:bg-accent transition-colors"
+                onClick={() => router.back()}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
         </div>
-        <button
-          type="submit"
-          disabled={loading}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-        >
-          {loading ? "Saving..." : blog ? "Update Blog" : "Publish Blog"}
-        </button>
-      </form>
+      </div>
     </div>
   );
 }

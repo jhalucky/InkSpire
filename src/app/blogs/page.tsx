@@ -37,13 +37,48 @@ export default function BlogsPage() {
   if (blogs.length === 0) return <p className="text-center mt-10">No blogs found.</p>;
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">All Blogs</h1>
-      {blogs
-        .filter((b) => b) // ensure no nulls
-        .map((blog) => (
-          <BlogCard key={blog.id} blog={blog} currentUserId={currentUserId} />
-        ))}
+    <div className="max-w-4xl mx-auto">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">Discover Stories</h1>
+        <p className="text-muted-foreground">
+          Explore amazing stories from our community of writers
+        </p>
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-wrap gap-2 mb-6">
+        <button className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium">
+          All
+        </button>
+        <button className="px-4 py-2 bg-muted text-muted-foreground rounded-lg text-sm font-medium hover:bg-accent transition-colors">
+          Trending
+        </button>
+        <button className="px-4 py-2 bg-muted text-muted-foreground rounded-lg text-sm font-medium hover:bg-accent transition-colors">
+          Recent
+        </button>
+        <button className="px-4 py-2 bg-muted text-muted-foreground rounded-lg text-sm font-medium hover:bg-accent transition-colors">
+          Popular
+        </button>
+      </div>
+
+      {/* Blogs Grid */}
+      <div className="space-y-6">
+        {blogs
+          .filter((b) => b) // ensure no nulls
+          .map((blog) => (
+            <BlogCard key={blog.id} blog={blog} currentUserId={currentUserId} />
+          ))}
+      </div>
+
+      {/* Load More */}
+      {blogs.length > 0 && (
+        <div className="text-center mt-12">
+          <button className="px-6 py-3 bg-muted text-muted-foreground rounded-lg font-medium hover:bg-accent transition-colors">
+            Load More Stories
+          </button>
+        </div>
+      )}
     </div>
   );
 }

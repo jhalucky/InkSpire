@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState, ReactElement } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import ProfileBlogCard from "@/components/ProfileBlogCard";
+import SessionProvider from "@/components/SessionProvider";
 
 // ------------------ SOCIAL ICONS ------------------
 const socialSvgs: Record<string, ReactElement> = {
@@ -163,55 +163,10 @@ const ProfileCard = ({ session }: { session: any }) => {
 };
 
 // ------------------ PROFILE BLOG CARD ------------------
-const ProfileBlogCard = ({
-  blog,
-  currentUserId,
-  onDelete,
-}: {
-  blog: any;
-  currentUserId: string;
-  onDelete: (id: string) => void;
-}) => {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const toggleMenu = () => setMenuOpen(!menuOpen);
+<SessionProvider session={session}>
+  <ProfileBlogCard />
+</SessionProvider>
 
-  return (
-    <div className="relative border p-4 rounded shadow bg-white dark:bg-gray-800">
-      <div className="flex justify-between items-start">
-        <h3 className="font-bold text-lg">{blog.title}</h3>
-        {currentUserId === blog.authorId && (
-          <div className="relative">
-            <button
-              onClick={toggleMenu}
-              className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
-            >
-              ⋮
-            </button>
-            {menuOpen && (
-              <div className="absolute right-0 mt-2 w-32 bg-white dark:bg-gray-700 shadow-lg rounded border z-10">
-                <Link
-                  href={`/blog/edit/${blog.id}`}
-                  className="block w-full text-left px-4 py-2 hover:bg-gray-300 dark:hover:bg-gray-600"
-                >
-                  Edit
-                </Link>
-                <button
-                  onClick={() => onDelete(blog.id)}
-                  className="block w-full text-left px-4 py-2 hover:bg-red-600 hover:text-white"
-                >
-                  Delete
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-      <div className="mt-2 text-gray-700 dark:text-gray-200 prose max-w-full">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>{blog.content}</ReactMarkdown>
-      </div>
-    </div>
-  );
-};
 
 // ------------------ PROFILE PAGE ------------------
 export default function ProfilePage() {

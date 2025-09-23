@@ -17,7 +17,7 @@ interface ProfileBlogCardProps {
 
 export default function ProfileBlogCard({ blog }: ProfileBlogCardProps) {
   return (
-    <div className="p-6 rounded-xl shadow-md bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
+    <div className="p-6 rounded-xl shadow-md bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 mb-2">
       <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
         {blog.title}
       </h2>

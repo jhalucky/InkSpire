@@ -1,75 +1,79 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import Image from "next/image";
-import { FaTwitter, FaInstagram, FaLinkedinIn, FaGithub } from "react-icons/fa";
+import Hero from "@/components/Hero";
+import About from "@/components/About";
 
 export default function LandingPage() {
   const router = useRouter();
 
+  const features: never[] = [];
+
   return (
-    <div className="flex flex-col min-h-screen items-center text-white">
-      {/* Hero Section */}
-      <div className="flex flex-col flex-1 items-center justify-center text-center p-6">
-        <h1 className="text-8xl sm:text-9xl tracking-widest mb-6 font-sans">
-          InkSpire
-        </h1>
-        <p className="text-gray-400 text-xl sm:text-lg mb-12 max-w-xl font-sans">
-          Share your stories, inspire the world, and connect with fellow writers.
-        </p>
-        <button
-          onClick={() => router.push("/blogs")}
-          className="bg-white text-black font-bold py-4 px-10 rounded-lg text-xl transition-all duration-300 shadow-lg hover:shadow-xl"
-        >
-          Enter the World of Blogging
-        </button>
-      </div>
+    <div className="min-h-screen relative">
+      <Hero />
 
-      {/* Footer */}
-      <footer className="w-full py-6 text-center text-gray-400 flex flex-col items-center justify-center gap-4">
-        <div className="flex gap-4">
-          {/* GitHub Icon */}
-          <a
-            href="https://github.com/jhalucky"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-gray-400 hover:text-white transition-colors"
-          >
-            <FaGithub size={24} />
-          </a>
+      {/* Section: Highlights */}
+      <About />
 
-          {/* X (Twitter) Icon */}
-          <a
-            href="https://x.com/theluckyjha"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-gray-400 hover:text-white transition-colors"
-          >
-            <FaTwitter size={24} />
-          </a>
-
-          {/* Instagram Icon */}
-          <a
-            href="https://instagram.com/jhalucky"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-gray-400 hover:text-white transition-colors"
-          >
-            <FaInstagram size={24} />
-          </a>
-
-          {/* LinkedIn Icon */}
-          <a
-            href="https://linkedin.com/in/jhalucky"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-gray-400 hover:text-white transition-colors"
-          >
-            <FaLinkedinIn size={24} />
-          </a>
+      {/* Section: Get started */}
+      <section className="container mx-auto px-4 sm:px-6 lg:px-8 pb-24">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="h2-title text-2xl sm:text-3xl text-white mb-4">Start in minutes</h2>
+          <p className="muted mb-8">Create an account, write your first post, and share it with the world.</p>
+          <div className="flex items-center justify-center gap-4">
+            <button onClick={() => router.push('/signup')} className="btn-white">Create Account</button>
+            <button onClick={() => router.push('/blogs')} className="btn-outline">Browse Posts</button>
+          </div>
         </div>
-        <p>Built with ❤️ by Lucky Jha</p>
-      </footer>
+      </section>
+
+      {/* Social Links (hidden per request for simplicity)
+      <div className="border-t border-border bg-transparent">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-6">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Heart className="h-4 w-4 text-red-500" />
+              <span>Built with love by Lucky Jha</span>
+            </div>
+            
+            <div className="flex gap-4">
+              <a
+                href="https://github.com/jhalucky"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-foreground transition-colors p-2 rounded-lg hover:bg-accent"
+              >
+                <FaGithub size={20} />
+              </a>
+              <a
+                href="https://x.com/theluckyjha"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-foreground transition-colors p-2 rounded-lg hover:bg-accent"
+              >
+                <FaTwitter size={20} />
+              </a>
+              <a
+                href="https://instagram.com/jhalucky"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-foreground transition-colors p-2 rounded-lg hover:bg-accent"
+              >
+                <FaInstagram size={20} />
+              </a>
+              <a
+                href="https://linkedin.com/in/jhalucky"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-foreground transition-colors p-2 rounded-lg hover:bg-accent"
+              >
+                <FaLinkedinIn size={20} />
+              </a>
+            </div>
+          </div>
+        </div>
+       </div> */}
     </div>
   );
 }
