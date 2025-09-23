@@ -163,9 +163,9 @@ const ProfileCard = ({ session }: { session: any }) => {
 };
 
 // ------------------ PROFILE BLOG CARD ------------------
-<SessionProvider session={session}>
+{/* <SessionProvider session={session}>
   <ProfileBlogCard />
-</SessionProvider>
+</SessionProvider> */}
 
 
 // ------------------ PROFILE PAGE ------------------
@@ -237,6 +237,15 @@ export default function ProfilePage() {
       </div>
     );
   }
+  return (
+    <SessionProvider session={session}>
+      <div className="p-8">
+        <ProfileCard session={session} />
+        <ProfileBlogCard blogs={blogs} loading={loadingBlogs} />
+      </div>
+    </SessionProvider>
+  );
+}
 
   if (!session) return null;
 

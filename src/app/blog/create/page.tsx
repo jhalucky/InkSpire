@@ -2,13 +2,13 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AIWritingAssistant from "@/components/AIWritingAssistant";
 import SocialSnippets from "@/components/SocialSnippets";
 import AICoverImageGenerator from "@/components/AICoverImageGenerator";
 
 export default function CreateBlogPage({ blog }: { blog?: any }) {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
 
   const [title, setTitle] = useState(blog?.title || "");
@@ -17,10 +17,12 @@ export default function CreateBlogPage({ blog }: { blog?: any }) {
   const [error, setError] = useState("");
   const [coverImage, setCoverImage] = useState(blog?.coverImage || "");
 
-  if (!session) {
-    router.push("/signin");
-    return null;
-  }
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/signin");
+    }
+  }, [status, router]);
+
 
   const applyFormat = (syntax: string, closingSyntax?: string) => {
     const textarea = document.getElementById("content") as HTMLTextAreaElement;
