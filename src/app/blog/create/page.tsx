@@ -186,7 +186,7 @@ export default function CreateBlogPage({ blog }: { blog?: any }) {
               title={title}
               onSuggestionApply={(suggestion) => {
                 // Apply suggestion to content
-                setContent(prev => prev + '\n\n' + suggestion);
+                setContent((prev: string) => prev + '\n\n' + suggestion);
               }}
             />
 
