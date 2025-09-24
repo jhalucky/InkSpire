@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import AIWritingAssistant from "@/components/AIWritingAssistant";
 import ReadingModes from "@/components/ReadingModes";
-import TippingSystem from "@/components/TippingSystem";
+import TippingPage from "../tipping/page";
 import InteractiveBlogFeatures from "@/components/InteractiveBlogFeatures";
 import GamificationSystem from "@/components/GamificationSystem";
 import Communities from "@/components/Communities";
@@ -62,7 +62,7 @@ export default function FeaturesPage() {
       title: "Tipping System",
       description: "Support creators with built-in tipping functionality",
       icon: <Coffee className="w-6 h-6" />,
-      component: <TippingSystem 
+      component: <TippingPage
         authorId="demo-author"
         authorName="Demo Author"
         authorImage="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face"

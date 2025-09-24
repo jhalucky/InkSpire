@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Hero from "@/components/Hero";
 import About from "@/components/About";
@@ -7,73 +8,48 @@ import About from "@/components/About";
 export default function LandingPage() {
   const router = useRouter();
 
-  const features: never[] = [];
-
   return (
-    <div className="min-h-screen relative">
-      <Hero />
+    <div className="min-h-screen w-full bg-black text-white scroll-smooth">
+      
+      {/* Hero Section */}
+      <section className="w-full h-screen flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1 }}
+          className="container mx-auto px-6 lg:px-20 text-center"
+        >
+          <Hero />
 
-      {/* Section: Highlights */}
-      <About />
-
-      {/* Section: Get started */}
-      <section className="container mx-auto px-4 sm:px-6 lg:px-8 pb-24">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="h2-title text-2xl sm:text-3xl text-white mb-4">Start in minutes</h2>
-          <p className="muted mb-8">Create an account, write your first post, and share it with the world.</p>
-          <div className="flex items-center justify-center gap-4">
-            <button onClick={() => router.push('/signup')} className="btn-white">Create Account</button>
-            <button onClick={() => router.push('/blogs')} className="btn-outline">Browse Posts</button>
+          <div className="mt-8 flex flex-wrap justify-center gap-4">
+            <button
+              onClick={() => router.push("/signup")}
+              className="px-6 py-3 bg-white text-black rounded-lg font-semibold hover:bg-gray-200 transition cursor-pointer"
+            >
+              Get Started
+            </button>
+            <button
+              onClick={() => router.push("/blogs")}
+              className="px-6 py-3 border border-white text-white rounded-lg font-semibold hover:bg-white hover:text-black transition"
+            >
+              Browse Blogs
+            </button>
           </div>
-        </div>
+        </motion.div>
       </section>
 
-      {/* Social Links (hidden per request for simplicity)
-      <div className="border-t border-border bg-transparent">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-6">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Heart className="h-4 w-4 text-red-500" />
-              <span>Built with love by Lucky Jha</span>
-            </div>
-            
-            <div className="flex gap-4">
-              <a
-                href="https://github.com/jhalucky"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-foreground transition-colors p-2 rounded-lg hover:bg-accent"
-              >
-                <FaGithub size={20} />
-              </a>
-              <a
-                href="https://x.com/theluckyjha"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-foreground transition-colors p-2 rounded-lg hover:bg-accent"
-              >
-                <FaTwitter size={20} />
-              </a>
-              <a
-                href="https://instagram.com/jhalucky"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-foreground transition-colors p-2 rounded-lg hover:bg-accent"
-              >
-                <FaInstagram size={20} />
-              </a>
-              <a
-                href="https://linkedin.com/in/jhalucky"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-foreground transition-colors p-2 rounded-lg hover:bg-accent"
-              >
-                <FaLinkedinIn size={20} />
-              </a>
-            </div>
-          </div>
-        </div>
-       </div> */}
+      {/* About Section */}
+      <section className="w-full h-screen flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1 }}
+          viewport={{ once: true }}
+          className="container mx-auto px-6 lg:px-20 text-center"
+        >
+          <About />
+        </motion.div>
+      </section>
     </div>
   );
 }

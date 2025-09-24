@@ -8,6 +8,7 @@ import Navbar from "@/components/Navbar"; // Import the new Navbar
 import SessionProvider from "@/components/SessionProvider";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import Link from "next/link";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -28,7 +29,7 @@ export default async function RootLayout({
       <body className={`${inter.className} min-h-screen text-foreground antialiased relative`}>
         {/* Global unified background */}
         <div className="fixed inset-0 -z-10">
-          <div className="absolute inset-0 bg-gradient-to-br from-black via-neutral-950 to-black" />
+          <div className="absolute inset-0 bg-black" />
           <div
             className="absolute inset-0 opacity-5"
             style={{
@@ -48,7 +49,7 @@ export default async function RootLayout({
               <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                   <div className="text-sm text-muted-foreground">
-                    © 2025 InkSpire. Built with ❤️ by Lucky Jha
+                    © 2025 InkSpire. Built with ❤️ by <span className="text-indigo-400 hover:text-white"><Link href={"https://www.luckyworks.in/"}> Lucky Jha </Link></span>
                   </div>
                   <div className="flex gap-4 text-sm text-muted-foreground">
                     <a href="/privacy" className="hover:text-foreground transition-colors">Privacy</a>

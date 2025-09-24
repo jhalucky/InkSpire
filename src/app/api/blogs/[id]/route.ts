@@ -1,10 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
-// GET single blog by id
-export async function GET(req: NextRequest, context: { params: Promise<{ id: string }> }) {
+// GET single blog
+export async function GET(req: NextRequest, context: { params: { id: string } }) {
   try {
-    const { id } = await context.params;
+    const { id } = context.params;
 
     const blog = await prisma.blog.findUnique({
       where: { id },
@@ -15,19 +15,23 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
       },
     });
 
-    if (!blog) return NextResponse.json({ error: "Blog not found" }, { status: 404 });
+    if (!blog)
+      return NextResponse.json({ error: "Blog not found" }, { status: 404 });
 
-    return NextResponse.json(blog);
+    return NextResponse.json({
+      ...blog,
+      authorId: blog.author?.id, // include authorId for front-end
+    });
   } catch (err) {
     console.error(err);
     return NextResponse.json({ error: "Failed to fetch blog" }, { status: 500 });
   }
 }
 
-// PUT update blog by id
-export async function PUT(req: NextRequest, context: { params: Promise<{ id: string }> }) {
+// PUT update blog
+export async function PUT(req: NextRequest, context: { params: { id: string } }) {
   try {
-    const { id } = await context.params;
+    const { id } = context.params;
     const { title, content } = await req.json();
 
     const updated = await prisma.blog.update({
@@ -42,13 +46,11 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ id: str
   }
 }
 
-// DELETE blog by id
-export async function DELETE(req: NextRequest, context: { params: Promise<{ id: string }> }) {
+// DELETE blog
+export async function DELETE(req: NextRequest, context: { params: { id: string } }) {
   try {
-    const { id } = await context.params;
-
+    const { id } = context.params;
     await prisma.blog.delete({ where: { id } });
-
     return NextResponse.json({ message: "Blog deleted" });
   } catch (err) {
     console.error(err);
