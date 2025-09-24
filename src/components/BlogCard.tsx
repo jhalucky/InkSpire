@@ -6,34 +6,37 @@ import { useState } from "react";
 import { Heart, Coffee, MessageSquare } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-const fallbackImage = "https://cdn-icons-png.flaticon.com/512/1144/1144760.png";
-
 type Blog = {
   id: string;
   title: string;
   content: string;
   authorId: string;
-  author: { name?: string | null; username?: string | null; image?: string | null } | null;
+  author: {
+    name?: string | null;
+    username?: string | null;
+    image?: string | null;
+  } | null;
   likes?: { id: string }[];
-  comments?: { id: string; content: string; author: { name?: string | null; image?: string | null } }[];
+  comments?: {
+    id: string;
+    content: string;
+    author: { name?: string | null; image?: string | null };
+  }[];
 };
 
-export default function BlogCard({
-  blog,
-  currentUserId,
-}: {
+interface BlogCardProps {
   blog: Blog;
   currentUserId: string;
-}) {
-  const router = useRouter();
-  const [comment, setComment] = useState("");
-  const [comments, setComments] = useState(blog.comments ?? []);
-  const [likes, setLikes] = useState(blog.likes ?? []);
-  const [showInteractiveFeatures, setShowInteractiveFeatures] = useState(false);
+  onTipClick?: (blog: Blog) => void;
+}
 
-  const handleTipClick = () => {
-    router.push(`/tipping?blogId=${blog.id}`);
-  };
+const fallbackImage = "https://cdn-icons-png.flaticon.com/512/1144/1144760.png";
+
+export default function BlogCard({ blog, currentUserId, onTipClick }: BlogCardProps) {
+  const router = useRouter();
+  const [likes, setLikes] = useState(blog.likes ?? []);
+  const [comments, setComments] = useState(blog.comments ?? []);
+  const [showInteractiveFeatures, setShowInteractiveFeatures] = useState(false);
 
   const handleLike = async () => {
     try {
@@ -43,6 +46,14 @@ export default function BlogCard({
       setLikes(new Array(data.likesCount).fill({ id: currentUserId }));
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const handleTipClick = () => {
+    if (onTipClick) {
+      onTipClick(blog);
+    } else {
+      router.push(`/tipping?blogId=${blog.id}`);
     }
   };
 
@@ -111,7 +122,7 @@ export default function BlogCard({
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Tip Author button triggers TippingPage */}
+            {/* Tip Author button */}
             <button
               onClick={handleTipClick}
               className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all duration-300 shadow-lg hover:shadow-xl"
