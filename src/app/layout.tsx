@@ -42,7 +42,7 @@ export default async function RootLayout({
         <SessionProvider session={session}>
           <div className="flex flex-col min-h-screen">
             <Navbar />
-            <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 lg:pt-32 pb-12">
+            <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 pb-12">
               {children}
             </main>
             <footer className="border-t border-border bg-[#0b0b0b] py-6">
