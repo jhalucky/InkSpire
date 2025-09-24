@@ -4,6 +4,13 @@ import { useState } from "react";
 import Script from "next/script";
 import { FaCreditCard, FaPaypal, FaRupeeSign, FaStripe } from "react-icons/fa";
 
+interface TippingPageProps {
+    authorId: string;
+    authorName: string;
+    authorImage: string;
+    onTip?: (amount: number, message: string) => void;
+  }
+
 export default function TippingPage() {
   const [amount, setAmount] = useState<number>(0);
   const [message, setMessage] = useState("");
