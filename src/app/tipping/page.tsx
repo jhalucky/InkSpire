@@ -1,17 +1,22 @@
-"use client";
+"use client"
 
 import { useState } from "react";
 import Script from "next/script";
-import { FaCreditCard, FaPaypal, FaRupeeSign, FaStripe } from "react-icons/fa";
+import { FaRupeeSign, FaCreditCard, FaPaypal, FaStripe } from "react-icons/fa";
 
 interface TippingPageProps {
-    authorId: string;
-    authorName: string;
-    authorImage: string;
-    onTip?: (amount: number, message: string) => void;
-  }
+  authorId?: string;
+  authorName?: string;
+  authorImage?: string;
+  onTip?: (amount: number, message: string) => void;
+}
 
-export default function TippingPage() {
+export default function TippingPage({
+  authorId,
+  authorName = "Lucky Jha",
+  authorImage = "https://your-logo-url.com/logo.png",
+  onTip,
+}: TippingPageProps) {
   const [amount, setAmount] = useState<number>(0);
   const [message, setMessage] = useState("");
 
@@ -25,7 +30,7 @@ export default function TippingPage() {
       const orderRes = await fetch("/api/payments/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount }),
+        body: JSON.stringify({ amount, authorId }),
       });
 
       const order = await orderRes.json();
@@ -44,9 +49,9 @@ export default function TippingPage() {
         key,
         amount: order.amount,
         currency: order.currency,
-        name: "Support Lucky Jha",
+        name: `Support ${authorName}`,
         description: "Tipping the author",
-        image: "https://your-logo-url.com/logo.png",
+        image: authorImage,
         order_id: order.id,
         handler: async function (response: any) {
           const verifyRes = await fetch("/api/payments/verify", {
@@ -57,9 +62,10 @@ export default function TippingPage() {
 
           const result = await verifyRes.json();
           if (result.success) {
-            alert(`🎉 Thank you for tipping ₹${amount} to Lucky Jha!`);
+            alert(`🎉 Thank you for tipping ₹${amount} to ${authorName}!`);
             setAmount(0);
             setMessage("");
+            onTip?.(amount, message);
           } else {
             alert("❌ Payment verification failed");
           }
@@ -83,9 +89,9 @@ export default function TippingPage() {
     <>
       <Script src="https://checkout.razorpay.com/v1/checkout.js" />
 
-      <div className="max-w-md mx-auto p-8 bg-card border rounded-xl shadow-lg space-y-6">
+      <div className="max-w-md mx-auto p-8 bg-card border rounded-xl mt-15 shadow-lg space-y-6">
         <h2 className="text-2xl font-bold text-foreground text-center">
-          Support Lucky Jha
+          Support {authorName}
         </h2>
         <p className="text-sm text-muted-foreground text-center">
           Tip the author to show your support. Choose a payment method below.
@@ -127,3 +133,4 @@ export default function TippingPage() {
     </>
   );
 }
+

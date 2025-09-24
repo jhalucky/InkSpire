@@ -62,13 +62,16 @@ export default function FeaturesPage() {
       title: "Tipping System",
       description: "Support creators with built-in tipping functionality",
       icon: <Coffee className="w-6 h-6" />,
-      component: <TippingPage
-        authorId="demo-author"
-        authorName="Demo Author"
-        authorImage="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face"
-        onTip={(amount, message) => console.log('Tipped:', amount, message)}
-      />
+      component: (
+        <TippingPage
+          authorId="demo-author"
+          authorName="Demo Author"
+          authorImage="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face"
+          onTip={(amount, message) => console.log('Tipped:', amount, message)}
+        />
+      )
     },
+    
     {
       id: "interactive",
       title: "Interactive Features",
