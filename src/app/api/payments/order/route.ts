@@ -19,3 +19,10 @@
 //     return NextResponse.json({ error: "Failed to create order" }, { status: 500 });
 //   }
 // }
+// src/app/api/payments/order/route.ts
+
+export async function POST() {
+    // Temporary placeholder so build succeeds
+    return new Response(JSON.stringify({ message: "Payments temporarily disabled" }));
+  }
+  
