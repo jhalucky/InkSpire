@@ -9,10 +9,16 @@ type Blog = {
   authorId: string;
   title: string;
   content: string;
-  author: { id: string; name?: string; username?: string; image?: string } | null;
+  author: {
+    id?: string;
+    name?: string | null; 
+    username?: string | null;
+    image?: string | null;
+  } | null;
   likes?: { id: string }[];
-  comments?: { id: string; content: string; author: { name?: string; image?: string } }[];
+  comments?: { id: string; content: string; author: { name?: string | null; image?: string | null } }[];
 };
+
 
 export default function BlogsPage() {
   const [blogs, setBlogs] = useState<Blog[]>([]);
