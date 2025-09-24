@@ -6,6 +6,7 @@ import BlogCard from "@/components/BlogCard";
 
 type Blog = {
   id: string;
+  authorId: string;
   title: string;
   content: string;
   author: { id: string; name?: string; username?: string; image?: string } | null;
