@@ -20,11 +20,11 @@ export default function TippingPage({
   const [amount, setAmount] = useState<number>(0);
   const [message, setMessage] = useState("");
 
-  const handlePayment = async () => {
-    if (amount <= 0) {
-      alert("Enter a valid amount");
-      return;
-    }
+//   const handlePayment = async () => {
+//     if (amount <= 0) {
+//       alert("Enter a valid amount");
+//       return;
+//     }
 
     try {
       const orderRes = await fetch("/api/payments/order", {
