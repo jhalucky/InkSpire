@@ -2,9 +2,12 @@ import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
 // GET single blog
-export async function GET(req: NextRequest, context: { params: { id: string } }) {
+export async function GET(
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
-    const { id } = context.params;
+    const { id } = await context.params; 
 
     const blog = await prisma.blog.findUnique({
       where: { id },
@@ -29,9 +32,12 @@ export async function GET(req: NextRequest, context: { params: { id: string } })
 }
 
 // PUT update blog
-export async function PUT(req: NextRequest, context: { params: { id: string } }) {
+export async function PUT(
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
-    const { id } = context.params;
+    const { id } = await context.params; // ✅ await here
     const { title, content } = await req.json();
 
     const updated = await prisma.blog.update({
@@ -47,9 +53,12 @@ export async function PUT(req: NextRequest, context: { params: { id: string } })
 }
 
 // DELETE blog
-export async function DELETE(req: NextRequest, context: { params: { id: string } }) {
+export async function DELETE(
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
-    const { id } = context.params;
+    const { id } = await context.params; // ✅ await here
     await prisma.blog.delete({ where: { id } });
     return NextResponse.json({ message: "Blog deleted" });
   } catch (err) {
