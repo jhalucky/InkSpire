@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Script from "next/script";
 import { FaRupeeSign, FaCreditCard, FaPaypal, FaStripe } from "react-icons/fa";
+import { SiPhonepe, SiGooglepay } from "react-icons/si"; // additional UPI icons
 
 interface TippingPageProps {
   authorId?: string;
@@ -39,11 +40,10 @@ export default function TippingPage({
         return;
       }
 
-      const key = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
-      if (!key) {
-        alert("Razorpay key not found!");
-        return;
-      }
+      // Use test key if in development
+      const key =
+        process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ||
+        "rzp_test_YourTestKeyHere"; // fallback to test key
 
       const options: any = {
         key,
@@ -71,8 +71,8 @@ export default function TippingPage({
           }
         },
         prefill: {
-          name: "Your Name",
-          email: "youremail@example.com",
+          name: "Test User",
+          email: "test@example.com",
         },
         theme: { color: "#F37254" },
       };
@@ -98,11 +98,31 @@ export default function TippingPage({
         </p>
 
         {/* Payment Method Icons */}
-        <div className="flex justify-center gap-4 text-xl text-primary">
-          <FaRupeeSign title="UPI" className="hover:scale-110 transition-transform" />
-          <FaCreditCard title="Debit/Credit" className="hover:scale-110 transition-transform" />
-          <FaPaypal title="PayPal" className="hover:scale-110 transition-transform" />
-          <FaStripe title="Stripe" className="hover:scale-110 transition-transform" />
+        <div className="flex justify-center gap-4 text-2xl text-primary">
+          <FaRupeeSign
+            title="UPI"
+            className="hover:scale-110 transition-transform cursor-pointer"
+          />
+          <SiGooglepay
+            title="Google Pay"
+            className="hover:scale-110 transition-transform cursor-pointer"
+          />
+          <SiPhonepe
+            title="PhonePe"
+            className="hover:scale-110 transition-transform cursor-pointer"
+          />
+          <FaCreditCard
+            title="Debit/Credit"
+            className="hover:scale-110 transition-transform cursor-pointer"
+          />
+          <FaPaypal
+            title="PayPal"
+            className="hover:scale-110 transition-transform cursor-pointer"
+          />
+          <FaStripe
+            title="Stripe"
+            className="hover:scale-110 transition-transform cursor-pointer"
+          />
         </div>
 
         {/* Amount Input */}
@@ -132,6 +152,4 @@ export default function TippingPage({
       </div>
     </>
   );
-
-
 }
