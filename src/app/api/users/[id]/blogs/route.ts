@@ -1,23 +1,18 @@
-// src/app/api/users/[id]/route.ts
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> } // params is now a Promise
+  context: { params: Promise<{ id: string }> } // params is a Promise
 ) {
-  try {
-    const { id } = await params; // await the params to get the id
+  const { id } = await context.params; // await params to get id
 
+  try {
     const user = await prisma.user.findUnique({
       where: { id },
       include: {
         blogs: {
-          include: {
-            author: true,
-            likes: true,
-            comments: { include: { author: true } },
-          },
+          include: { author: true, likes: true, comments: { include: { author: true } } },
           orderBy: { createdAt: "desc" },
         },
       },
@@ -30,9 +25,6 @@ export async function GET(
     return NextResponse.json(user);
   } catch (err) {
     console.error(err);
-    return NextResponse.json(
-      { error: "Failed to fetch user" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch user" }, { status: 500 });
   }
 }

@@ -51,9 +51,9 @@ export async function GET(
 // DELETE user
 export async function DELETE(
   req: NextRequest,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
-  const { id } = context.params;
+  const { id } = await context.params;
   try {
     await prisma.user.delete({ where: { id } });
     return NextResponse.json(
