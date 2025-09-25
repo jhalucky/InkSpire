@@ -7,6 +7,7 @@ import QRCode from "react-qr-code";
 import { generateUpiLink } from "@/lib/upi";
 
 interface TippingSystemProps {
+  authorId: string;
   authorUpiId?: string | null;
   authorName: string;
   authorImage?: string;
