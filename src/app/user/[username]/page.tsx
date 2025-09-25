@@ -140,11 +140,15 @@ export default async function UserProfilePage({ params }: Props) {
           user.blogs.map((blog) => (
             <BlogCard
               key={blog.id}
-              blog={blog}
+              blog={{
+                ...blog,
+                comments: blog.comments ?? [], // ensure it's never undefined
+              }}
               currentUserId={currentUserId}
-              onTipClick={handleTipClick}
+              onTipClick={(b) => handleTipClick(b as typeof blog)} // match the enriched type
             />
           ))
+          
         )}
       </div>
     </div>
