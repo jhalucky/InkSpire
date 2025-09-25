@@ -4,9 +4,9 @@ import { prisma } from "@/lib/prisma";
 // GET blog by id
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> } // note the Promise
+  { params }: { params: Promise<{ id: string }> } 
 ) {
-  const { id } = await params; // await here
+  const { id } = await params; 
   try {
     const blog = await prisma.blog.findUnique({
       where: { id },

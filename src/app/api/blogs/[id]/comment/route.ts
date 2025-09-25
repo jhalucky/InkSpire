@@ -5,9 +5,9 @@ import { prisma } from "@/lib/prisma";
 
 export async function POST(
   req: NextRequest,
-  context: { params: Promise<{ id: string }> } // <--- Important change
+  context: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await context.params; // <--- await the Promise
+  const { id } = await context.params; 
 
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) {
