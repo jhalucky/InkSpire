@@ -1,155 +1,94 @@
-"use client"
+"use client";
 
-import { useState } from "react";
-import Script from "next/script";
-import { FaRupeeSign, FaCreditCard, FaPaypal, FaStripe } from "react-icons/fa";
-import { SiPhonepe, SiGooglepay } from "react-icons/si"; // additional UPI icons
+import { useSearchParams, useRouter } from "next/navigation";
+import TippingSystem from "@/components/TippingSystem";
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 
-interface TippingPageProps {
-  authorId?: string;
-  authorName?: string;
-  authorImage?: string;
-  onTip?: (amount: number, message: string) => void;
-}
+export default function TippingPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const { data: session } = useSession();
+  
+  const [authorId, setAuthorId] = useState("");
+  const [authorName, setAuthorName] = useState("");
+  const [authorImage, setAuthorImage] = useState<string | undefined>(undefined);
+  const [authorUpiId, setAuthorUpiId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-export default function TippingPage({
-  authorId,
-  authorName = "Lucky Jha",
-  authorImage = "https://your-logo-url.com/logo.png",
-  onTip,
-}: TippingPageProps) {
-  const [amount, setAmount] = useState<number>(0);
-  const [message, setMessage] = useState("");
+  useEffect(() => {
+    const blogId = searchParams.get("blogId");
 
-  const handlePayment = async () => {
-    if (amount <= 0) {
-      alert("Enter a valid amount");
+    if (!blogId) {
+      router.push("/blogs");
       return;
     }
 
+    const fetchAuthor = async () => {
+      try {
+        const res = await fetch(`/api/blogs/${blogId}`);
+        if (!res.ok) throw new Error("Failed to fetch blog");
+        const data = await res.json();
+        
+        setAuthorId(data.author.id);
+        setAuthorName(data.author?.name || "Unknown Author");
+        setAuthorImage(data.author?.image || undefined);
+        setAuthorUpiId(data.author?.upiId || null); // Fetch and set UPI ID
+      } catch (err) {
+        console.error(err);
+        router.push("/blogs");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAuthor();
+  }, [searchParams, router]);
+
+  if (loading) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+        <div className="text-white">Loading...</div>
+      </div>
+    );
+  }
+
+  const handleTip = async (amount: number, message: string) => {
     try {
-      const orderRes = await fetch("/api/payments/order", {
+      const res = await fetch("/api/tips", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount, authorId }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          toUserId: authorId,
+          fromUserId: session?.user?.id,
+          amount,
+          message,
+        }),
       });
 
-      const order = await orderRes.json();
-      if (!order.id) {
-        alert("Failed to create Razorpay order");
-        return;
+      if (!res.ok) {
+        throw new Error("Failed to post tip.");
       }
 
-      // Use test key if in development
-      const key =
-        process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ||
-        "rzp_test_YourTestKeyHere"; // fallback to test key
-
-      const options: any = {
-        key,
-        amount: order.amount,
-        currency: order.currency,
-        name: `Support ${authorName}`,
-        description: "Tipping the author",
-        image: authorImage,
-        order_id: order.id,
-        handler: async function (response: any) {
-          const verifyRes = await fetch("/api/payments/verify", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(response),
-          });
-
-          const result = await verifyRes.json();
-          if (result.success) {
-            alert(`🎉 Thank you for tipping ₹${amount} to ${authorName}!`);
-            setAmount(0);
-            setMessage("");
-            onTip?.(amount, message);
-          } else {
-            alert("❌ Payment verification failed");
-          }
-        },
-        prefill: {
-          name: "Test User",
-          email: "test@example.com",
-        },
-        theme: { color: "#F37254" },
-      };
-
-      const razorpay = new (window as any).Razorpay(options);
-      razorpay.open();
-    } catch (err: any) {
-      console.error(err);
-      alert(err.message || "Something went wrong with payment");
+      const data = await res.json();
+      console.log("Tip submitted successfully:", data);
+      router.push("/blogs");
+    } catch (err) {
+      console.error("Tip submission error:", err);
+      // You can display an error message to the user here
     }
   };
 
   return (
-    <>
-      <Script src="https://checkout.razorpay.com/v1/checkout.js" />
-
-      <div className="max-w-md mx-auto p-8 bg-card border rounded-xl mt-15 shadow-lg space-y-6">
-        <h2 className="text-2xl font-bold text-foreground text-center">
-          Support {authorName}
-        </h2>
-        <p className="text-sm text-muted-foreground text-center">
-          Tip the author to show your support. Choose a payment method below.
-        </p>
-
-        {/* Payment Method Icons */}
-        <div className="flex justify-center gap-4 text-2xl text-primary">
-          <FaRupeeSign
-            title="UPI"
-            className="hover:scale-110 transition-transform cursor-pointer"
-          />
-          <SiGooglepay
-            title="Google Pay"
-            className="hover:scale-110 transition-transform cursor-pointer"
-          />
-          <SiPhonepe
-            title="PhonePe"
-            className="hover:scale-110 transition-transform cursor-pointer"
-          />
-          <FaCreditCard
-            title="Debit/Credit"
-            className="hover:scale-110 transition-transform cursor-pointer"
-          />
-          <FaPaypal
-            title="PayPal"
-            className="hover:scale-110 transition-transform cursor-pointer"
-          />
-          <FaStripe
-            title="Stripe"
-            className="hover:scale-110 transition-transform cursor-pointer"
-          />
-        </div>
-
-        {/* Amount Input */}
-        <input
-          type="number"
-          value={amount}
-          onChange={(e) => setAmount(Number(e.target.value))}
-          placeholder="Enter amount (₹)"
-          className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:outline-none"
-        />
-
-        {/* Message Input */}
-        <textarea
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder="Add a message (optional)"
-          className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:outline-none"
-        />
-
-        {/* Tip Button */}
-        <button
-          onClick={handlePayment}
-          className="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all shadow-lg hover:shadow-xl"
-        >
-          Tip ₹{amount || 0}
-        </button>
-      </div>
-    </>
+    <TippingSystem
+      authorId={authorId}
+      authorName={authorName}
+      authorImage={authorImage}
+      authorUpiId={authorUpiId}
+      onTip={handleTip}
+      onClose={() => router.push("/blogs")}
+    />
   );
 }

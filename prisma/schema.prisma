@@ -1,129 +1,112 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql" // or your current DB
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-// ----------------------
-// User Model
-// ----------------------
 model User {
-  id               String     @id @default(cuid())
+  id               String    @id @default(cuid())
   name             String?
-  username         String?    @unique
-  email            String     @unique
+  username         String?   @unique
+  email            String    @unique
   emailVerified    DateTime?
-  image            String?
-  
-  // Custom profile fields
   bio              String?
   profession       String?
   education        String?
+  image            String?
   missionstatement String?
-  twitterUrl       String?    
+  twitterUrl       String?   
+  githubUrl        String?
   instagramUrl     String?
   linkedinUrl      String?
-  githubUrl        String?
-
-  // NextAuth relations
+  // Tipping details
+  upiId            String?
+  upiName          String?
+  upiVerified      Boolean   @default(false)
   accounts         Account[]
   sessions         Session[]
-
+  
+  // Tipping relations
+  tipsGiven        Tip[]     @relation("TipsGiven")
+  tipsReceived     Tip[]     @relation("TipsReceived")
   // Blog relations
-  blogs            Blog[]          // Blogs authored by user
-  comments         Comment[]       // Comments made by user
-  blogLikes        BlogLike[]      // Blogs liked by user
+  blogs            Blog[]
+  blogLikes        BlogLike[]
+  comments         Comment[]
 }
 
-// ----------------------
-// Account Model (NextAuth)
-// ----------------------
 model Account {
-  id                 String   @id @default(cuid())
-  userId             String
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String?
-  access_token       String?
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?
-  session_state      String?
-
-  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
 
-// ----------------------
-// Session Model (NextAuth)
-// ----------------------
 model Session {
   id           String   @id @default(cuid())
   sessionToken String   @unique
   userId       String
   expires      DateTime
-
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-// ----------------------
-// Verification Token (Email Auth)
-// ----------------------
-model VerificationToken {
-  identifier String
-  token      String   @unique
-  expires    DateTime
-
-  @@unique([identifier, token])
-}
-
-// ----------------------
-// Blog Model
-// ----------------------
 model Blog {
-  id        String      @id @default(cuid())
+  id        String     @id @default(cuid())
   title     String
-  content   String      // Can be markdown or rich text
-  author    User        @relation(fields: [authorId], references: [id])
+  content   String
   authorId  String
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-
-  // Relations
-  comments  Comment[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  author    User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
   likes     BlogLike[]
+  comments  Comment[]
 }
 
-// ----------------------
-// Comment Model
-// ----------------------
+model BlogLike {
+  id      String @id @default(cuid())
+  blogId  String
+  userId  String
+  blog    Blog   @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
 model Comment {
   id        String   @id @default(cuid())
   content   String
-  author    User     @relation(fields: [authorId], references: [id])
   authorId  String
-  blog      Blog     @relation(fields: [blogId], references: [id])
   blogId    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  blog      Blog     @relation(fields: [blogId], references: [id], onDelete: Cascade)
 }
 
-// ----------------------
-// Blog Like Model
-// ----------------------
-model BlogLike {
-  id      String   @id @default(cuid())
-  user    User     @relation(fields: [userId], references: [id])
-  userId  String
-  blog    Blog     @relation(fields: [blogId], references: [id])
-  blogId  String
-
-  @@unique([userId, blogId]) // Prevent duplicate likes
+model Tip {
+  id          String   @id @default(cuid())
+  amount      Float
+  message     String?
+  createdAt   DateTime @default(now())
+  
+  fromUser    User     @relation("TipsGiven", fields: [fromUserId], references: [id], onDelete: Cascade)
+  fromUserId  String
+  
+  toUser      User     @relation("TipsReceived", fields: [toUserId], references: [id], onDelete: Cascade)
+  toUserId    String
 }
-

@@ -41,7 +41,12 @@ export default function SignInPage() {
           Continue with GitHub
         </button>
       </div>
-   
+      <p className="mt-4 text-sm text-gray-400">
+        Don&apos;t have an account?{" "}
+        <Link href="/signup" className="text-blue-400 hover:underline">
+          Sign up
+        </Link>
+      </p>
     </div>
   );
 }

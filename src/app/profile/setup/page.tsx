@@ -19,6 +19,8 @@ export default function ProfileSetupPage() {
   const [linkedinUrl, setLinkedinUrl] = useState("");
   const [githubUrl, setGithubUrl] = useState("");
   const [instagramUrl, setInstagramUrl] = useState("");
+  const [upiId, setUpiId] = useState(""); // new UPI field
+  const [showUpiInput, setShowUpiInput] = useState(false); // toggle input
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -36,6 +38,7 @@ export default function ProfileSetupPage() {
       setLinkedinUrl(session.user.linkedinUrl || "");
       setGithubUrl(session.user.githubUrl || "");
       setInstagramUrl(session.user.instagramUrl || "");
+      setUpiId(session.user.upiId || ""); // prefill if exists
       setImagePreview(session.user.image || null);
     }
   }, [session?.user]);
@@ -130,6 +133,33 @@ export default function ProfileSetupPage() {
     }
   };
 
+  const handleUpiSave = async () => {
+    if (!upiId.trim()) {
+      setError("UPI ID cannot be empty");
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/profile/upi", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ upiId }),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || "Failed to save UPI");
+      }
+
+      await update(); // update session
+      setShowUpiInput(false);
+      setError("");
+      alert("UPI details saved successfully!");
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
   const handleCancel = () => router.push("/profile");
 
   return (
@@ -137,6 +167,7 @@ export default function ProfileSetupPage() {
       <h1 className="text-3xl font-bold mb-6">Complete Your Profile</h1>
       {error && <p className="text-red-500 mb-4">{error}</p>}
       <form onSubmit={handleSubmit} className="w-full space-y-4">
+        {/* --- ALL YOUR ORIGINAL FIELDS START --- */}
         {/* Profile Image */}
         <div className="relative w-24 h-24 mx-auto mb-4 group">
           <Image
@@ -292,6 +323,8 @@ export default function ProfileSetupPage() {
           />
         </div>
 
+        {/* --- ALL YOUR ORIGINAL FIELDS END --- */}
+
         {/* Buttons */}
         <div className="flex gap-4 pt-4">
           <button
@@ -308,6 +341,36 @@ export default function ProfileSetupPage() {
           >
             Cancel
           </button>
+        </div>
+
+        {/* Add UPI section */}
+        <div className="mt-6">
+          {!showUpiInput ? (
+            <button
+              type="button"
+              className="w-full py-2 bg-green-600 hover:bg-green-700 rounded-lg text-white font-semibold"
+              onClick={() => setShowUpiInput(true)}
+            >
+              Add UPI Details to receive tips from blogs
+            </button>
+          ) : (
+            <div className="space-y-2">
+              <input
+                type="text"
+                placeholder="Enter your UPI ID (example: xyz@upi)"
+                value={upiId}
+                onChange={(e) => setUpiId(e.target.value)}
+                className="w-full p-2 rounded-md bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+              <button
+                type="button"
+                onClick={handleUpiSave}
+                className="w-full py-2 bg-green-600 hover:bg-green-700 rounded-lg text-white font-semibold"
+              >
+                Save UPI
+              </button>
+            </div>
+          )}
         </div>
       </form>
     </div>

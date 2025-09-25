@@ -23,7 +23,7 @@ export default function Navbar() {
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-border/50 glass backdrop-blur-xl bg-background/80">
       <div className="container mx-auto px-6 sm:px-8 lg:px-12 justify-between">
-        <div className="flex h-20 items-center justify-between">
+        <div className="flex h-18 items-center justify-between">
           {/* Left: Logo */}
           <div className="flex items-center space-x-4">
             <Link href="/" className="flex items-center space-x-4 group">

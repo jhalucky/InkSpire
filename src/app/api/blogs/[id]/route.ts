@@ -4,10 +4,10 @@ import { NextRequest, NextResponse } from "next/server";
 // GET single blog
 export async function GET(
   req: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await context.params; 
+    const { id } = params;
 
     const blog = await prisma.blog.findUnique({
       where: { id },
@@ -23,7 +23,7 @@ export async function GET(
 
     return NextResponse.json({
       ...blog,
-      authorId: blog.author?.id, // include authorId for front-end
+      authorId: blog.author?.id, // include authorId for frontend
     });
   } catch (err) {
     console.error(err);
@@ -34,10 +34,10 @@ export async function GET(
 // PUT update blog
 export async function PUT(
   req: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await context.params; // ✅ await here
+    const { id } = params;
     const { title, content } = await req.json();
 
     const updated = await prisma.blog.update({
@@ -55,10 +55,10 @@ export async function PUT(
 // DELETE blog
 export async function DELETE(
   req: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await context.params; // ✅ await here
+    const { id } = params;
     await prisma.blog.delete({ where: { id } });
     return NextResponse.json({ message: "Blog deleted" });
   } catch (err) {
