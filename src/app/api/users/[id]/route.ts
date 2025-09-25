@@ -72,9 +72,9 @@ export async function DELETE(
 // PUT or PATCH user data
 export async function PUT(
   req: NextRequest,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
-  const { id } = context.params;
+  const { id } = await context.params;
   try {
     const body = await req.json();
     const {
