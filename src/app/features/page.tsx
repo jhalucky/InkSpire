@@ -5,8 +5,6 @@ import {
   Sparkles, 
   PenTool, 
   Users, 
-  TrendingUp, 
-  BookOpen, 
   Coffee, 
   MessageSquare, 
   Trophy, 
@@ -15,10 +13,10 @@ import {
   Eye,
   Zap,
   Target,
-  Award,
   Mail,
   Palette
 } from "lucide-react";
+
 import AIWritingAssistant from "@/components/AIWritingAssistant";
 import ReadingModes from "@/components/ReadingModes";
 import TippingPage from "../tipping/page";
@@ -31,6 +29,14 @@ import PaidNewsletter from "@/components/PaidNewsletter";
 import SponsorshipMarketplace from "@/components/SponsorshipMarketplace";
 import CustomBranding from "@/components/CustomBranding";
 
+// Props interface for TippingPage
+interface TippingPageProps {
+  authorId: string;
+  authorName: string;
+  authorImage: string;
+  onTip: (amount: number, message: string) => void;
+}
+
 export default function FeaturesPage() {
   const [activeFeature, setActiveFeature] = useState<string>("ai-writing");
 
@@ -40,22 +46,26 @@ export default function FeaturesPage() {
       title: "AI Writing Assistant",
       description: "Smart grammar, readability, and SEO suggestions powered by AI",
       icon: <Sparkles className="w-6 h-6" />,
-      component: <AIWritingAssistant 
-        content="This is a sample blog post content that demonstrates the AI writing assistant capabilities. It can analyze grammar, suggest improvements, and provide SEO recommendations."
-        title="Sample Blog Post"
-        onSuggestionApply={(suggestion) => console.log('Applied suggestion:', suggestion)}
-      />
+      component: (
+        <AIWritingAssistant 
+          content="This is a sample blog post content that demonstrates the AI writing assistant capabilities. It can analyze grammar, suggest improvements, and provide SEO recommendations."
+          title="Sample Blog Post"
+          onSuggestionApply={(suggestion) => console.log('Applied suggestion:', suggestion)}
+        />
+      ),
     },
     {
       id: "reading-modes",
       title: "Reading Modes",
       description: "Focus, Fast, and Deep reading modes for personalized experience",
       icon: <Eye className="w-6 h-6" />,
-      component: <ReadingModes 
-        content="This is a comprehensive blog post about the future of content creation. It covers various aspects including AI integration, user experience, and community building. The content is designed to be engaging and informative, providing readers with valuable insights into the evolving landscape of digital content."
-        title="The Future of Content Creation"
-        onModeChange={(mode) => console.log('Reading mode changed:', mode)}
-      />
+      component: (
+        <ReadingModes 
+          content="This is a comprehensive blog post about the future of content creation. It covers various aspects including AI integration, user experience, and community building. The content is designed to be engaging and informative, providing readers with valuable insights into the evolving landscape of digital content."
+          title="The Future of Content Creation"
+          onModeChange={(mode) => console.log('Reading mode changed:', mode)}
+        />
+      ),
     },
     {
       id: "tipping",
@@ -69,96 +79,111 @@ export default function FeaturesPage() {
           authorImage="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face"
           onTip={(amount, message) => console.log('Tipped:', amount, message)}
         />
-      )
+      ),
     },
-    
     {
       id: "interactive",
       title: "Interactive Features",
       description: "Polls, quizzes, and commentable highlights",
       icon: <MessageSquare className="w-6 h-6" />,
-      component: <InteractiveBlogFeatures 
-        blogId="demo-blog"
-        onVote={(pollId, optionId) => console.log('Voted:', pollId, optionId)}
-        onQuizAnswer={(quizId, answerId) => console.log('Quiz answered:', quizId, answerId)}
-        onHighlightComment={(highlightId, comment) => console.log('Highlight comment:', highlightId, comment)}
-      />
+      component: (
+        <InteractiveBlogFeatures 
+          blogId="demo-blog"
+          onVote={(pollId, optionId) => console.log('Voted:', pollId, optionId)}
+          onQuizAnswer={(quizId, answerId) => console.log('Quiz answered:', quizId, answerId)}
+          onHighlightComment={(highlightId, comment) => console.log('Highlight comment:', highlightId, comment)}
+        />
+      ),
     },
     {
       id: "gamification",
       title: "Gamification",
       description: "Reading streaks, points, and badges system",
       icon: <Trophy className="w-6 h-6" />,
-      component: <GamificationSystem 
-        userId="demo-user"
-        onAchievementUnlock={(achievementId) => console.log('Achievement unlocked:', achievementId)}
-      />
+      component: (
+        <GamificationSystem 
+          userId="demo-user"
+          onAchievementUnlock={(achievementId) => console.log('Achievement unlocked:', achievementId)}
+        />
+      ),
     },
     {
       id: "communities",
       title: "Communities",
       description: "Topic-based communities and discussion forums",
       icon: <Users className="w-6 h-6" />,
-      component: <Communities 
-        onJoinCommunity={(communityId) => console.log('Joined community:', communityId)}
-        onCreateCommunity={() => console.log('Create community clicked')}
-      />
+      component: (
+        <Communities 
+          onJoinCommunity={(communityId) => console.log('Joined community:', communityId)}
+          onCreateCommunity={() => console.log('Create community clicked')}
+        />
+      ),
     },
     {
       id: "social-snippets",
       title: "Social Snippets",
       description: "Auto-generate LinkedIn/Twitter/X snippets",
       icon: <Share2 className="w-6 h-6" />,
-      component: <SocialSnippets 
-        title="The Future of AI in Content Creation"
-        content="Artificial Intelligence is revolutionizing how we create content. From automated writing assistants to AI-generated images, the landscape is changing rapidly. This article explores the latest trends and what they mean for content creators."
-        authorName="Demo Author"
-        authorUsername="demoauthor"
-        blogUrl="https://inkspire.com/blog/demo"
-      />
+      component: (
+        <SocialSnippets 
+          title="The Future of AI in Content Creation"
+          content="Artificial Intelligence is revolutionizing how we create content. From automated writing assistants to AI-generated images, the landscape is changing rapidly. This article explores the latest trends and what they mean for content creators."
+          authorName="Demo Author"
+          authorUsername="demoauthor"
+          blogUrl="https://inkspire.com/blog/demo"
+        />
+      ),
     },
     {
       id: "cover-images",
       title: "AI Cover Images",
       description: "Generate custom cover images with AI",
       icon: <Image className="w-6 h-6" />,
-      component: <AICoverImageGenerator 
-        title="The Future of AI in Content Creation"
-        content="Artificial Intelligence is revolutionizing how we create content. From automated writing assistants to AI-generated images, the landscape is changing rapidly."
-        onImageGenerated={(imageUrl) => console.log('Image generated:', imageUrl)}
-      />
+      component: (
+        <AICoverImageGenerator 
+          title="The Future of AI in Content Creation"
+          content="Artificial Intelligence is revolutionizing how we create content. From automated writing assistants to AI-generated images, the landscape is changing rapidly."
+          onImageGenerated={(imageUrl) => console.log('Image generated:', imageUrl)}
+        />
+      ),
     },
     {
       id: "paid-newsletters",
       title: "Paid Newsletters",
       description: "Monetize your content with subscription-based newsletters",
       icon: <Mail className="w-6 h-6" />,
-      component: <PaidNewsletter 
-        authorId="demo-author"
-        authorName="Demo Author"
-        authorImage="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face"
-        onSubscribe={(tier, paymentMethod) => console.log('Subscribed to:', tier, paymentMethod)}
-      />
+      component: (
+        <PaidNewsletter 
+          authorId="demo-author"
+          authorName="Demo Author"
+          authorImage="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face"
+          onSubscribe={(tier, paymentMethod) => console.log('Subscribed to:', tier, paymentMethod)}
+        />
+      ),
     },
     {
       id: "sponsorship-marketplace",
       title: "Sponsorship Marketplace",
       description: "Connect with brands for sponsored content opportunities",
       icon: <Target className="w-6 h-6" />,
-      component: <SponsorshipMarketplace 
-        onApply={(opportunityId) => console.log('Applied to:', opportunityId)}
-        onCreateOpportunity={() => console.log('Create opportunity clicked')}
-      />
+      component: (
+        <SponsorshipMarketplace 
+          onApply={(opportunityId) => console.log('Applied to:', opportunityId)}
+          onCreateOpportunity={() => console.log('Create opportunity clicked')}
+        />
+      ),
     },
     {
       id: "custom-branding",
       title: "Custom Branding",
       description: "Personalize your profile with custom themes and branding",
       icon: <Palette className="w-6 h-6" />,
-      component: <CustomBranding 
-        userId="demo-user"
-        onSave={(branding) => console.log('Branding saved:', branding)}
-      />
+      component: (
+        <CustomBranding 
+          userId="demo-user"
+          onSave={(branding) => console.log('Branding saved:', branding)}
+        />
+      ),
     }
   ];
 
