@@ -4,7 +4,7 @@ import BlogCard from "@/components/BlogCard";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import Image from "next/image";
-import { Blog } from "@prisma/client";
+import { User, Blog } from "@prisma/client";
 
 type Props = { params: { username: string } };
 
@@ -13,7 +13,7 @@ export default async function UserProfilePage({ params }: Props) {
   const session = await getServerSession(authOptions);
   const currentUserId = session?.user?.id ?? "";
 
-  // Fetch user first
+  // Fetch user along with blogs, author, likes, and comments
   const user = await prisma.user.findUnique({
     where: { username },
     include: {
@@ -28,11 +28,12 @@ export default async function UserProfilePage({ params }: Props) {
     },
   });
 
-  // Return early if user not found
   if (!user) return <p>User not found</p>;
 
-  // Define handleTipClick after user is guaranteed to exist
-  const handleTipClick = (blog: typeof user.blogs[0]) => {
+  // Define the correct blog type returned by Prisma
+  type EnrichedBlog = typeof user.blogs[0];
+
+  const handleTipClick = (blog: EnrichedBlog) => {
     console.log("Tip clicked for blog:", blog.id);
   };
 
@@ -85,7 +86,6 @@ export default async function UserProfilePage({ params }: Props) {
                 <span>{twitterHandle}</span>
               </a>
             )}
-
             {instagramHandle && (
               <a
                 href={user.instagramUrl ?? undefined}
@@ -100,7 +100,6 @@ export default async function UserProfilePage({ params }: Props) {
                 <span>{instagramHandle}</span>
               </a>
             )}
-
             {linkedinHandle && (
               <a
                 href={user.linkedinUrl ?? undefined}
@@ -115,7 +114,6 @@ export default async function UserProfilePage({ params }: Props) {
                 <span>{linkedinHandle}</span>
               </a>
             )}
-
             {githubHandle && (
               <a
                 href={user.githubUrl ?? undefined}
@@ -140,7 +138,12 @@ export default async function UserProfilePage({ params }: Props) {
           <p className="text-gray-700 dark:text-gray-300">No blogs yet.</p>
         ) : (
           user.blogs.map((blog) => (
-            <BlogCard key={blog.id} blog={blog} currentUserId={currentUserId} onTipClick={handleTipClick}/>
+            <BlogCard
+              key={blog.id}
+              blog={blog}
+              currentUserId={currentUserId}
+              onTipClick={handleTipClick}
+            />
           ))
         )}
       </div>
