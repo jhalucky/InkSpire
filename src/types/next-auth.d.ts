@@ -16,6 +16,7 @@ declare module "next-auth" {
       instagramUrl?: string | null;
       linkedinUrl?: string | null;
       githubUrl?: string | null;
+      upiId?: string | null;
     };
   }
 
@@ -32,5 +33,6 @@ declare module "next-auth" {
     instagramUrl?: string | null;
     linkedinUrl?: string | null;
     githubUrl?: string | null;
+    upiId?: string | null;
   }
 }
