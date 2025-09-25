@@ -4,6 +4,7 @@ import BlogCard from "@/components/BlogCard";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import Image from "next/image";
+import { Blog } from "@prisma/client";
 
 type Props = { params: { username: string } };
 
@@ -12,13 +13,7 @@ export default async function UserProfilePage({ params }: Props) {
   const session = await getServerSession(authOptions);
   const currentUserId = session?.user?.id ?? "";
 
-  if (!user) return <p>User not found</p>;
-
-  const handleTipClick = (blog: typeof user.blogs[0]) => {
-    console.log("Tip clicked for blog:", blog.id);
-  };
-
-  
+  // Fetch user first
   const user = await prisma.user.findUnique({
     where: { username },
     include: {
@@ -33,7 +28,13 @@ export default async function UserProfilePage({ params }: Props) {
     },
   });
 
+  // Return early if user not found
   if (!user) return <p>User not found</p>;
+
+  // Define handleTipClick after user is guaranteed to exist
+  const handleTipClick = (blog: typeof user.blogs[0]) => {
+    console.log("Tip clicked for blog:", blog.id);
+  };
 
   // Utility to extract username from social URLs
   const extractHandle = (url: string) => {
