@@ -11,7 +11,13 @@ export default async function UserProfilePage({ params }: Props) {
   const { username } = params;
   const session = await getServerSession(authOptions);
   const currentUserId = session?.user?.id ?? "";
+  
+  const handleTipClick = (blog: typeof user.blogs[0]) => {
+    // You can navigate to the tipping page or open a modal
+    console.log("Tip clicked for blog:", blog.id);
+  };
 
+  
   const user = await prisma.user.findUnique({
     where: { username },
     include: {
@@ -132,7 +138,7 @@ export default async function UserProfilePage({ params }: Props) {
           <p className="text-gray-700 dark:text-gray-300">No blogs yet.</p>
         ) : (
           user.blogs.map((blog) => (
-            <BlogCard key={blog.id} blog={blog} currentUserId={currentUserId} />
+            <BlogCard key={blog.id} blog={blog} currentUserId={currentUserId} onTipClick={handleTipClick}/>
           ))
         )}
       </div>
