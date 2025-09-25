@@ -1,68 +1,50 @@
-import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
-// GET single blog
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+// GET blog by id
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+  const { id } = params;
   try {
-    const { id } = params;
-
     const blog = await prisma.blog.findUnique({
       where: { id },
       include: {
         author: true,
         likes: true,
-        comments: { include: { author: true } },
+        comments: { include: { author: true }, orderBy: { createdAt: "desc" } },
       },
     });
-
-    if (!blog)
-      return NextResponse.json({ error: "Blog not found" }, { status: 404 });
-
-    return NextResponse.json({
-      ...blog,
-      authorId: blog.author?.id, // include authorId for frontend
-    });
+    if (!blog) return NextResponse.json({ error: "Blog not found" }, { status: 404 });
+    return NextResponse.json(blog);
   } catch (err) {
     console.error(err);
     return NextResponse.json({ error: "Failed to fetch blog" }, { status: 500 });
   }
 }
 
-// PUT update blog
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const { id } = params;
-    const { title, content } = await req.json();
+// POST toggle like
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+  const { id: blogId } = params;
+  const body = await req.json();
 
-    const updated = await prisma.blog.update({
-      where: { id },
-      data: { title, content },
-    });
-
-    return NextResponse.json(updated);
-  } catch (err: any) {
-    console.error(err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  // Toggle like
+  if (body.likeAction && body.userId) {
+    try {
+      const existingLike = await prisma.blogLike.findFirst({
+        where: { blogId, userId: body.userId },
+      });
+      if (existingLike) {
+        await prisma.blogLike.delete({ where: { id: existingLike.id } });
+      } else {
+        await prisma.blogLike.create({ data: { blogId, userId: body.userId } });
+      }
+      const likesCount = await prisma.blogLike.count({ where: { blogId } });
+      const liked = !!(await prisma.blogLike.findFirst({ where: { blogId, userId: body.userId } }));
+      return NextResponse.json({ likesCount, liked });
+    } catch (err) {
+      console.error(err);
+      return NextResponse.json({ error: "Failed to toggle like" }, { status: 500 });
+    }
   }
-}
 
-// DELETE blog
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const { id } = params;
-    await prisma.blog.delete({ where: { id } });
-    return NextResponse.json({ message: "Blog deleted" });
-  } catch (err) {
-    console.error(err);
-    return NextResponse.json({ error: "Failed to delete blog" }, { status: 500 });
-  }
+  return NextResponse.json({ error: "Invalid request" }, { status: 400 });
 }
