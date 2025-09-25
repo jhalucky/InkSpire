@@ -11,9 +11,10 @@ export default async function UserProfilePage({ params }: Props) {
   const { username } = params;
   const session = await getServerSession(authOptions);
   const currentUserId = session?.user?.id ?? "";
-  
+
+  if (!user) return <p>User not found</p>;
+
   const handleTipClick = (blog: typeof user.blogs[0]) => {
-    // You can navigate to the tipping page or open a modal
     console.log("Tip clicked for blog:", blog.id);
   };
 
