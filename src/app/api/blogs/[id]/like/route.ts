@@ -16,10 +16,9 @@ export async function POST(req: NextRequest, context: { params: Promise<{ id: st
     if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
     // Check if user already liked the blog
-    const existingLike = await prisma.blogLike.findUnique({
-      where: {
-        userId_blogId: { userId: user.id, blogId },
-      },
+    const existingLike = await prisma.blogLike.findFirst({
+      where: { userId: user.id, blogId },
+      
     });
 
     let liked: boolean;
