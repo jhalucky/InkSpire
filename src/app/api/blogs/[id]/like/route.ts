@@ -3,8 +3,11 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: NextRequest, context: { params: Promise<{ id: string }> }) {
-  const { id: blogId } = await context.params;
+export async function POST(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const { id: blogId } = params;
 
   try {
     const session = await getServerSession(authOptions);
@@ -17,8 +20,9 @@ export async function POST(req: NextRequest, context: { params: Promise<{ id: st
 
     // Check if user already liked the blog
     const existingLike = await prisma.blogLike.findFirst({
-      where: { userId: user.id, blogId },
-      
+      where: {
+        userId_blogId: { userId: user.id, blogId },
+      },
     });
 
     let liked: boolean;

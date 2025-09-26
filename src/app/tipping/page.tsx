@@ -1,68 +1,50 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import TippingSystem from "@/components/TippingSystem";
-import { useSession } from "next-auth/react";
 
-interface TippingPageProps {
-  authorId: string;
-  authorName: string;
-  authorImage?: string;
-  authorUpiId?: string | null;
-  onTip: (amount: number, message: string) => void;
-  onClose?: () => void;
-}
-
-export default function TippingPage({
-  authorId,
-  authorName,
-  authorImage,
-  authorUpiId,
-  onTip,
-  onClose,
-}: TippingPageProps) {
+export default function TippingPage() {
+  const searchParams = useSearchParams();
   const router = useRouter();
-  const { data: session } = useSession();
+  const authorId = searchParams.get("authorId");
 
-  const handleTip = async (amount: number, message: string) => {
-    try {
-      // If you want to submit via API
-      if (!authorId) throw new Error("Author ID missing");
+  const [authorUpiId, setAuthorUpiId] = useState<string | null>(null);
 
-      const res = await fetch("/api/tips", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          toUserId: authorId,
-          fromUserId: session?.user?.id || null,
-          amount,
-          message,
-        }),
-      });
+  useEffect(() => {
+    if (!authorId) return;
 
-      if (!res.ok) throw new Error("Failed to submit tip");
+    // Fetch only the UPI ID from backend
+    fetch(`/api/user/${authorId}`, { cache: "no-store" })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Fetched data:", data);
+        if (data?.upiId) {
+          setAuthorUpiId(data.upiId);
+        } else {
+          console.error("Author UPI ID missing");
+        }
+      })
+      .catch((err) => console.error("Error fetching author UPI:", err));
+  }, [authorId]);
 
-      const data = await res.json();
-      console.log("Tip submitted successfully:", data);
+  if (!authorId) {
+    return (
+      <p className="text-red-500 text-center mt-10">
+        Author ID missing. Cannot tip.
+      </p>
+    );
+  }
 
-      // Call external onTip handler if provided
-      if (onTip) onTip(amount, message);
-
-      // Close modal or navigate away
-      if (onClose) onClose();
-    } catch (err) {
-      console.error("Tip submission error:", err);
-    }
-  };
+  if (!authorUpiId) {
+    return <p className="text-center mt-10">Loading author details...</p>;
+  }
 
   return (
-    <TippingSystem
+    <TippingSystem  
       authorId={authorId}
-      authorName={authorName}
-      authorImage={authorImage}
       authorUpiId={authorUpiId}
-      onTip={handleTip}
-      onClose={onClose || (() => router.push("/blogs"))}
+      onClose={() => router.push("/blogs")}
     />
   );
 }

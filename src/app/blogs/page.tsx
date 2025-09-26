@@ -46,8 +46,13 @@ export default function BlogsPage() {
   if (blogs.length === 0) return <p className="text-center mt-10">No blogs found.</p>;
 
   const handleTipClick = (blog: Blog) => {
-    router.push(`/tipping?blogId=${blog.id}`);
+    if (!blog.author?.id) {
+      console.error("Author ID missing for this blog");
+      return;
+    }
+    router.push(`/tipping?authorId=${blog.author.id}&authorName=${encodeURIComponent(blog.author.name || "")}&authorImage=${encodeURIComponent(blog.author.image || "")}`);
   };
+  
 
   return (
     <div className="max-w-4xl mx-auto mt-5 md:mt-10">
