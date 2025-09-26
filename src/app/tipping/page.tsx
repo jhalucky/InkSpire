@@ -4,6 +4,14 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import TippingSystem from "@/components/TippingSystem";
 
+
+interface TippingPageProps {
+  authorId: string;
+  authorName: string;
+  authorImage: string;
+  onTip: (amount: number, message: string) => void;
+}
+
 export default function TippingPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
