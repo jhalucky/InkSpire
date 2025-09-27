@@ -143,17 +143,17 @@ export default function BlogCard({
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
             >
               <MessageSquare className="w-4 h-4" />
-              <span className="text-sm font-medium">Interactive</span>
+              <span className="text-[10px] md:text-sm">Interactive</span>
             </button>
           </div>
 
           <div className="flex items-center gap-2">
           <button
   onClick={() => router.push(`/tipping?authorId=${blog.authorId}`)}
-  className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all duration-300 shadow-lg hover:shadow-xl"
+  className="inline-flex items-center gap-2 px-1 md:px-4 md:py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all duration-300 shadow-lg hover:shadow-xl"
 >
   <Coffee className="w-4 h-4" />
-  <span>Tip Author</span>
+  <span className="text-[8px] md:text-sm">Tip Author</span>
 </button>
 
 
