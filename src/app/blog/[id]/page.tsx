@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
+import ReadingModes from "@/components/ReadingModes";
+import { Heart, MessageSquare } from "lucide-react"; // Imported for visual display
 
 type Blog = {
   id: string;
@@ -37,56 +39,94 @@ export default function BlogPage() {
   if (loading) return <p className="text-center mt-10">Loading blog...</p>;
   if (!blog) return <p className="text-center mt-10">Blog not found.</p>;
 
+  // Function to simulate reading time logic for display (based on word count/Prisma date)
+  const getMetadata = () => {
+    const minutes = Math.ceil(blog.content.length / 500); // 500 chars/min is a rough estimate
+    const date = new Date(blog.createdAt);
+    return {
+      readingTime: `~${minutes} min read`,
+      publishedAt: date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
+    };
+  };
+
+  const metadata = getMetadata();
+
   return (
-    <div className="max-w-3xl mx-auto p-6">
-      <div className="flex items-center gap-4 mb-6">
+    <div className="max-w-3xl mx-auto px-6 py-12 bg-black text-white min-h-screen">
+      
+      {/* Author Info */}
+      <div className="flex items-center gap-4 mb-8">
         {blog.author.image ? (
           <Image
             src={blog.author.image}
             alt={blog.author.name || "Author"}
-            width={40}
-            height={40}
+            width={48}
+            height={48}
             className="w-12 h-12 rounded-full object-cover"
           />
         ) : (
-          <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center text-white">
+          <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center text-white text-xl font-bold">
             {blog.author.name?.[0] || "U"}
           </div>
         )}
         <div>
-          <h3 className="font-bold">{blog.author.name || "Unknown"}</h3>
-          <p className="text-sm text-gray-500">@{blog.author.username || "unknown"}</p>
+          <h3 className="font-bold text-lg">{blog.author.name || "Unknown Author"}</h3>
+          <p className="text-sm text-gray-400">@{blog.author.username || "unknown"}</p>
+        </div>
+      </div>
+      
+      {/* Post Title & Metadata (THE MAIN DISPLAY) */}
+      <div className="mb-10">
+        <h1 className="text-4xl font-extrabold mb-3">{blog.title}</h1>
+        <div className="flex gap-4 text-sm text-gray-500">
+          <span>{metadata.readingTime}</span>
+          <span>•</span>
+          <span>Published on {metadata.publishedAt}</span>
         </div>
       </div>
 
-      <h1 className="text-4xl font-bold mb-4">{blog.title}</h1>
-      <p className="text-gray-700 whitespace-pre-line leading-relaxed mb-6">
-        {blog.content}
-      </p>
-
-      <div className="flex gap-6 text-gray-600 text-sm mb-6">
-        <span>❤️ {blog.likes.length} Likes</span>
-        <span>💬 {blog.comments.length} Comments</span>
+      {/* Reading Modes & Controls */}
+      {/* NOTE: ReadingModes will handle the display of the CONTENT itself */}
+      <div className="mb-20 pb-4 border">
+        <ReadingModes
+          content={blog.content}
+          title={blog.title}
+          metadata={metadata}
+          onModeChange={(mode) => console.log("Mode changed to:", mode)}
+        />
       </div>
 
-      <div className="mt-8">
-        <h2 className="text-2xl font-semibold mb-4">Comments</h2>
+      {/* Action Bar (Likes & Comments Count) */}
+      <div className="flex gap-8 text-gray-400 text-base py-4 border border-gray-700">
+        <span className="flex items-center gap-2 font-medium ml-5">
+            <Heart className="w-5 h-5 text-red-500 fill-red-500/20" /> 
+            {blog.likes.length} Likes
+        </span>
+        <span className="flex items-center gap-2 font-medium">
+            <MessageSquare className="w-5 h-5" /> 
+            {blog.comments.length} Comments
+        </span>
+      </div>
+
+      {/* Comments Section */}
+      <div className="mt-12">
+        <h2 className="text-2xl font-bold mb-6">Comments ({blog.comments.length})</h2>
         {blog.comments.length === 0 ? (
-          <p className="text-gray-500">No comments yet.</p>
+          <p className="text-gray-500">No comments yet. Be the first to start a discussion!</p>
         ) : (
-          <ul className="space-y-4">
+          <ul className="space-y-6">
             {blog.comments.map((comment) => (
-              <li key={comment.id} className="p-3 bg-gray-500 rounded-md flex items-center gap-2">
+              <li key={comment.id} className="p-4 bg-gray-800 rounded-lg flex items-start gap-4">
                 <Image
                   src={comment.author?.image || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"}
                   alt={comment.author?.name || "Anonymous"}
-                   width={40}
-  height={40}
-                  className="w-8 h-8 rounded-full object-cover"
+                  width={40}
+                  height={40}
+                  className="w-10 h-10 rounded-full object-cover flex-shrink-0"
                 />
                 <div>
-                  <p className="font-semibold">{comment.author?.name || "Anonymous"}</p>
-                  <p>{comment.content}</p>
+                  <p className="font-semibold text-gray-200 mb-1">{comment.author?.name || "Anonymous"}</p>
+                  <p className="text-gray-300 text-base">{comment.content}</p>
                 </div>
               </li>
             ))}
