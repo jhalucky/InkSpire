@@ -124,51 +124,70 @@ export default function BlogCard({
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleLike}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
-                likes.some((l) => l.id === currentUserId)
-                  ? "text-red-500 bg-red-50 dark:bg-red-950/20"
-                  : "text-muted-foreground hover:text-foreground hover:bg-accent"
-              }`}
-            >
-              <Heart className={`w-4 h-4 ${likes.some((l) => l.id === currentUserId) ? 'fill-current' : ''}`} />
-              <span className="text-sm font-medium">{likes.length}</span>
-            </button>
-
-            <button
-              onClick={() => setShowInteractiveFeatures(!showInteractiveFeatures)}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-            >
-              <MessageSquare className="w-4 h-4" />
-              <span className="text-[10px] md:text-sm">Interactive</span>
-            </button>
-          </div>
-
-          <div className="flex items-center gap-2">
-          <button
-  onClick={() => router.push(`/tipping?authorId=${blog.authorId}`)}
-  className="inline-flex items-center gap-2 px-1 md:px-4 md:py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all duration-300 shadow-lg hover:shadow-xl"
+        <div
+  className="
+    grid grid-cols-2 gap-3 text-center
+    md:flex md:flex-row md:items-center md:justify-between md:gap-0
+  "
 >
-  <Coffee className="w-4 h-4" />
-  <span className="text-[8px] md:text-sm">Tip Author</span>
-</button>
+  {/* Like */}
+  <button
+    onClick={handleLike}
+    className={`flex justify-center items-center gap-2 px-3 py-2 rounded-lg transition-colors w-full ${
+      likes.some((l) => l.id === currentUserId)
+        ? "text-red-500 bg-red-50 dark:bg-red-950/20"
+        : "text-muted-foreground hover:text-foreground hover:bg-accent"
+    }`}
+  >
+    <Heart
+      className={`w-4 h-4 ${
+        likes.some((l) => l.id === currentUserId) ? "fill-current" : ""
+      }`}
+    />
+    <span className="text-sm font-medium">{likes.length}</span>
+  </button>
+
+  {/* Interactive */}
+  <button
+    onClick={() => setShowInteractiveFeatures(!showInteractiveFeatures)}
+    className="flex justify-center items-center gap-2 px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors w-full"
+  >
+    <MessageSquare className="w-4 h-4" />
+    <span className="text-[10px] md:text-sm">Interactive</span>
+  </button>
+
+  {/* Tip Author */}
+  <button
+    onClick={() => router.push(`/tipping?authorId=${blog.authorId}`)}
+    className="inline-flex justify-center items-center gap-2 px-1 md:px-4 md:py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all duration-300 shadow-lg hover:shadow-xl w-full"
+  >
+    <Coffee className="w-4 h-4" />
+    <span className="text-[8px] md:text-sm">Tip Author</span>
+  </button>
+
+  {/* Read More */}
+  <Link
+    href={`/blog/${blog.id}`}
+    className="inline-flex justify-center items-center text-sm font-medium text-primary hover:text-primary/80 transition-colors w-full"
+  >
+    Read More
+    <svg
+      className="w-4 h-4 ml-1"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M9 5l7 7-7 7"
+      />
+    </svg>
+  </Link>
+</div>
 
 
-
-            <Link
-              href={`/blog/${blog.id}`}
-              className="inline-flex items-center text-sm font-medium text-primary hover:text-primary/80 transition-colors"
-            >
-              Read More
-              <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
-          </div>
-        </div>
       </div>
     </article>
   );

@@ -76,6 +76,7 @@ export default function TippingSystem({ authorId, authorUpiId, onClose }: Tippin
 
         <p className="text-center text-gray-500 text-sm">
           Author ID: <span className="font-mono">{authorId}</span>
+         
         </p>
 
         {/* Default Amount Buttons */}
@@ -86,9 +87,9 @@ export default function TippingSystem({ authorId, authorUpiId, onClose }: Tippin
               onClick={() => setAmount(item.amount)}
               className={`flex items-center gap-2 justify-center py-2 rounded-lg border 
                 border-gray-700 hover:border-green-500 transition
-                ${amount === item.amount ? "bg-green-700 text-white" : "bg-gray-900 text-gray-300"}`}
+                ${amount === item.amount ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white" : "bg-black white"}`}
             >
-              {item.icon} {item.label} ₹{item.amount}
+              {item.icon} {item.label} ₹{item.amount} 
             </button>
           ))}
         </div>
@@ -104,7 +105,7 @@ export default function TippingSystem({ authorId, authorUpiId, onClose }: Tippin
               const val = parseFloat(e.target.value);
               setAmount(isNaN(val) ? "" : val);
             }}
-            className="w-full px-10 py-2 rounded-lg border border-gray-700 bg-gray-900 text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full px-10 py-2 rounded-lg border border-gray-700 bg-black text-white"
             placeholder="Enter custom amount"
           />
         </div>
@@ -114,7 +115,7 @@ export default function TippingSystem({ authorId, authorUpiId, onClose }: Tippin
           type="text"
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          className="w-full px-4 py-2 rounded-lg border border-gray-700 bg-gray-900 text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+          className="w-full px-4 py-2 rounded-lg border border-gray-700 bg-black text-white focus:outline-none focus:ring-2 focus:ring-green-500"
           placeholder="Add a note"
         />
 
@@ -129,7 +130,7 @@ export default function TippingSystem({ authorId, authorUpiId, onClose }: Tippin
         <button
           onClick={handlePay}
           disabled={saving || !amount}
-          className="w-full flex justify-center items-center gap-2 bg-green-600 hover:bg-green-700 active:scale-95 text-white font-semibold py-2 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full flex justify-center items-center gap-2 bg-gradient-to-r from-amber-500 to-orange-500 active:scale-95 text-white font-semibold py-2 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {saving ? "Processing..." : "Pay via UPI"}
         </button>
