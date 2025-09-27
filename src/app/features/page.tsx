@@ -1,20 +1,20 @@
 "use client";
 
-import { useState } from "react";
-import { 
-  Sparkles, 
-  PenTool, 
-  Users, 
-  Coffee, 
-  MessageSquare, 
-  Trophy, 
-  Image, 
+import { useState, useEffect } from "react";
+import {
+  Sparkles,
+  PenTool,
+  Users,
+  Coffee,
+  MessageSquare,
+  Trophy,
+  Image,
   Share2,
   Eye,
   Zap,
   Target,
   Mail,
-  Palette
+  Palette,
 } from "lucide-react";
 
 import AIWritingAssistant from "@/components/AIWritingAssistant";
@@ -29,16 +29,31 @@ import PaidNewsletter from "@/components/PaidNewsletter";
 import SponsorshipMarketplace from "@/components/SponsorshipMarketplace";
 import CustomBranding from "@/components/CustomBranding";
 
-// Props interface for TippingPage
-interface TippingPageProps {
-  authorId: string;
-  authorName: string;
-  authorImage: string;
-  onTip: (amount: number, message: string) => void;
-}
-
 export default function FeaturesPage() {
   const [activeFeature, setActiveFeature] = useState<string>("ai-writing");
+  const [author, setAuthor] = useState<{
+    id: string;
+    name: string;
+    image: string;
+    username: string;
+  } | null>(null);
+
+  useEffect(() => {
+    // Fetch the real logged-in user / author
+    fetch("/api/auth/me", { cache: "no-store" })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.id) {
+          setAuthor({
+            id: data.id,
+            name: data.name,
+            image: data.image,
+            username: data.username,
+          });
+        }
+      })
+      .catch((err) => console.error("Error fetching author:", err));
+  }, []);
 
   const features = [
     {
@@ -47,10 +62,10 @@ export default function FeaturesPage() {
       description: "Smart grammar, readability, and SEO suggestions powered by AI",
       icon: <Sparkles className="w-6 h-6" />,
       component: (
-        <AIWritingAssistant 
-          content="This is a sample blog post content that demonstrates the AI writing assistant capabilities. It can analyze grammar, suggest improvements, and provide SEO recommendations."
+        <AIWritingAssistant
+          content="This is a sample blog post demonstrating the AI writing assistant capabilities."
           title="Sample Blog Post"
-          onSuggestionApply={(suggestion) => console.log('Applied suggestion:', suggestion)}
+          onSuggestionApply={(s) => console.log("Applied suggestion:", s)}
         />
       ),
     },
@@ -60,10 +75,10 @@ export default function FeaturesPage() {
       description: "Focus, Fast, and Deep reading modes for personalized experience",
       icon: <Eye className="w-6 h-6" />,
       component: (
-        <ReadingModes 
-          content="This is a comprehensive blog post about the future of content creation. It covers various aspects including AI integration, user experience, and community building. The content is designed to be engaging and informative, providing readers with valuable insights into the evolving landscape of digital content."
+        <ReadingModes
+          content="This is a blog post about the future of content creation and AI integration."
           title="The Future of Content Creation"
-          onModeChange={(mode) => console.log('Reading mode changed:', mode)}
+          onModeChange={(mode) => console.log("Reading mode changed:", mode)}
         />
       ),
     },
@@ -72,14 +87,7 @@ export default function FeaturesPage() {
       title: "Tipping System",
       description: "Support creators with built-in tipping functionality",
       icon: <Coffee className="w-6 h-6" />,
-      component: (
-        <TippingPage
-          authorId="demo-author"
-          authorName="Demo Author"
-          authorImage="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face"
-          onTip={(amount, message) => console.log('Tipped:', amount, message)}
-        />
-      ),
+      component: <TippingPage />,
     },
     {
       id: "interactive",
@@ -87,11 +95,11 @@ export default function FeaturesPage() {
       description: "Polls, quizzes, and commentable highlights",
       icon: <MessageSquare className="w-6 h-6" />,
       component: (
-        <InteractiveBlogFeatures 
-          blogId="demo-blog"
-          onVote={(pollId, optionId) => console.log('Voted:', pollId, optionId)}
-          onQuizAnswer={(quizId, answerId) => console.log('Quiz answered:', quizId, answerId)}
-          onHighlightComment={(highlightId, comment) => console.log('Highlight comment:', highlightId, comment)}
+        <InteractiveBlogFeatures
+          blogId="real-blog"
+          onVote={(pollId, optionId) => console.log("Voted:", pollId, optionId)}
+          onQuizAnswer={(quizId, ansId) => console.log("Quiz answered:", quizId, ansId)}
+          onHighlightComment={(hlId, c) => console.log("Highlight comment:", hlId, c)}
         />
       ),
     },
@@ -101,9 +109,9 @@ export default function FeaturesPage() {
       description: "Reading streaks, points, and badges system",
       icon: <Trophy className="w-6 h-6" />,
       component: (
-        <GamificationSystem 
-          userId="demo-user"
-          onAchievementUnlock={(achievementId) => console.log('Achievement unlocked:', achievementId)}
+        <GamificationSystem
+          userId={author?.id ?? ""}
+          onAchievementUnlock={(achId) => console.log("Achievement unlocked:", achId)}
         />
       ),
     },
@@ -113,9 +121,9 @@ export default function FeaturesPage() {
       description: "Topic-based communities and discussion forums",
       icon: <Users className="w-6 h-6" />,
       component: (
-        <Communities 
-          onJoinCommunity={(communityId) => console.log('Joined community:', communityId)}
-          onCreateCommunity={() => console.log('Create community clicked')}
+        <Communities
+          onJoinCommunity={(cid) => console.log("Joined community:", cid)}
+          onCreateCommunity={() => console.log("Create community clicked")}
         />
       ),
     },
@@ -124,13 +132,13 @@ export default function FeaturesPage() {
       title: "Social Snippets",
       description: "Auto-generate LinkedIn/Twitter/X snippets",
       icon: <Share2 className="w-6 h-6" />,
-      component: (
-        <SocialSnippets 
+      component: author && (
+        <SocialSnippets
           title="The Future of AI in Content Creation"
-          content="Artificial Intelligence is revolutionizing how we create content. From automated writing assistants to AI-generated images, the landscape is changing rapidly. This article explores the latest trends and what they mean for content creators."
-          authorName="Demo Author"
-          authorUsername="demoauthor"
-          blogUrl="https://inkspire.com/blog/demo"
+          content="AI is revolutionizing how we create content. From writing assistants to image generation, the landscape is changing rapidly."
+          authorName={author.name}
+          authorUsername={author.username}
+          blogUrl="https://inkspire.com/blog/real"
         />
       ),
     },
@@ -140,10 +148,10 @@ export default function FeaturesPage() {
       description: "Generate custom cover images with AI",
       icon: <Image className="w-6 h-6" />,
       component: (
-        <AICoverImageGenerator 
+        <AICoverImageGenerator
           title="The Future of AI in Content Creation"
-          content="Artificial Intelligence is revolutionizing how we create content. From automated writing assistants to AI-generated images, the landscape is changing rapidly."
-          onImageGenerated={(imageUrl) => console.log('Image generated:', imageUrl)}
+          content="Artificial Intelligence is changing how creators work and collaborate."
+          onImageGenerated={(url) => console.log("Image generated:", url)}
         />
       ),
     },
@@ -152,12 +160,12 @@ export default function FeaturesPage() {
       title: "Paid Newsletters",
       description: "Monetize your content with subscription-based newsletters",
       icon: <Mail className="w-6 h-6" />,
-      component: (
-        <PaidNewsletter 
-          authorId="demo-author"
-          authorName="Demo Author"
-          authorImage="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face"
-          onSubscribe={(tier, paymentMethod) => console.log('Subscribed to:', tier, paymentMethod)}
+      component: author && (
+        <PaidNewsletter
+          authorId={author.id}
+          authorName={author.name}
+          authorImage={author.image}
+          onSubscribe={(tier, method) => console.log("Subscribed to:", tier, method)}
         />
       ),
     },
@@ -167,9 +175,9 @@ export default function FeaturesPage() {
       description: "Connect with brands for sponsored content opportunities",
       icon: <Target className="w-6 h-6" />,
       component: (
-        <SponsorshipMarketplace 
-          onApply={(opportunityId) => console.log('Applied to:', opportunityId)}
-          onCreateOpportunity={() => console.log('Create opportunity clicked')}
+        <SponsorshipMarketplace
+          onApply={(oppId) => console.log("Applied to:", oppId)}
+          onCreateOpportunity={() => console.log("Create opportunity clicked")}
         />
       ),
     },
@@ -178,16 +186,16 @@ export default function FeaturesPage() {
       title: "Custom Branding",
       description: "Personalize your profile with custom themes and branding",
       icon: <Palette className="w-6 h-6" />,
-      component: (
-        <CustomBranding 
-          userId="demo-user"
-          onSave={(branding) => console.log('Branding saved:', branding)}
+      component: author && (
+        <CustomBranding
+          userId={author.id}
+          onSave={(branding) => console.log("Branding saved:", branding)}
         />
       ),
-    }
+    },
   ];
 
-  const activeFeatureData = features.find(f => f.id === activeFeature);
+  const activeFeatureData = features.find((f) => f.id === activeFeature);
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -210,14 +218,18 @@ export default function FeaturesPage() {
               onClick={() => setActiveFeature(feature.id)}
               className={`p-4 rounded-xl border-2 transition-all text-left ${
                 activeFeature === feature.id
-                  ? 'border-primary bg-primary/10'
-                  : 'border-border hover:border-primary/50'
+                  ? "border-primary bg-primary/10"
+                  : "border-border hover:border-primary/50"
               }`}
             >
               <div className="flex items-center gap-3 mb-2">
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                  activeFeature === feature.id ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-                }`}>
+                <div
+                  className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                    activeFeature === feature.id
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground"
+                  }`}
+                >
                   {feature.icon}
                 </div>
                 <h3 className="font-semibold text-foreground">{feature.title}</h3>
@@ -242,9 +254,7 @@ export default function FeaturesPage() {
               </div>
             </div>
           </div>
-          <div className="p-4 lg:p-6">
-            {activeFeatureData.component}
-          </div>
+          <div className="p-4 lg:p-6">{activeFeatureData.component}</div>
         </div>
       )}
 
