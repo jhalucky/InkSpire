@@ -6,6 +6,10 @@
   interface ReadingModesProps {
     content: string;
     title: string;
+    metadata?: {
+      readingTime: string;
+      publishedAt: string;
+    };
     onModeChange?: (mode: 'normal' | 'focus' | 'fast' | 'deep') => void;
   }
 
