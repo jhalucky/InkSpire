@@ -159,7 +159,7 @@ export default function BlogCard({
   {/* Tip Author */}
   <button
     onClick={() => router.push(`/tipping?authorId=${blog.authorId}`)}
-    className="inline-flex justify-center items-center gap-2 px-1 md:px-4 md:py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all duration-300 shadow-lg hover:shadow-xl w-full"
+    className="inline-flex justify-center items-center gap-2 px-1 md:px-4 py-2 md:py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all duration-300 shadow-lg hover:shadow-xl w-full"
   >
     <Coffee className="w-4 h-4" />
     <span className="text-[8px] md:text-sm">Tip Author</span>
