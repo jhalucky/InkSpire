@@ -8,6 +8,11 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        mono: ['Fira Code', 'monospace'],
+        cursive: ['Dancing Script', 'cursive'],
+      },
       colors: {
         background: "#000000", // black
         foreground: "#ffffff", // white

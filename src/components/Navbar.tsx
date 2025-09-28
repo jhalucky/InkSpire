@@ -35,7 +35,7 @@ export default function Navbar() {
           </div>
 
           {/* Center: Navigation */}
-          <div className="hidden md:flex flex-1 justify-center space-x-12">
+          <div className="hidden md:flex flex-1 justify-center space-x-12 cursive-mono">
             <Link href="/blogs" className="flex items-center gap-2 text-sm font-medium hover:text-blue-400">
               <BookOpen className="h-5 w-5" /> Discover
             </Link>

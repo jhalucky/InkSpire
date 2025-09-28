@@ -85,7 +85,7 @@ export default function BlogPage() {
       </div>
 
       {/* Reading Modes & Controls */}
-      <div className="mb-20 pb-4 border">
+      <div className="mb-20 pb-4 border-t">
         <ReadingModes
           content={blog.content}
           title={blog.title}
@@ -94,8 +94,8 @@ export default function BlogPage() {
         />
       </div>
 
-      {/* Action Bar (Likes & Comments Count) */}
-      <div className="flex gap-8 text-gray-400 text-base py-4 border border-gray-700">
+      
+      <div className="flex gap-8 text-gray-400 text-base py-4 border-t border-b border-gray-700">
         <span className="flex items-center gap-2 font-medium ml-5">
           <Heart className="w-5 h-5 text-red-500 fill-red-500/20" />
           {(blog.likes?.length ?? 0)} Likes

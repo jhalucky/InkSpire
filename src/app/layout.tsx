@@ -49,7 +49,7 @@ export default async function RootLayout({
               <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                   <div className="text-sm text-muted-foreground">
-                    © 2025 InkSpire. Built with ❤️ by <span className="text-indigo-400 hover:text-white"><Link href={"https://www.luckyworks.in/"}> Lucky Jha </Link></span>
+                    © 2025 InkSpire. Built with ❤️ by <span className="text-indigo-400 hover:text-white"><Link href={"https://www.luckyworks.in/"}> Bihari Ji </Link></span>
                   </div>
                   <div className="flex gap-4 text-sm text-muted-foreground">
                     <a href="/privacy" className="hover:text-foreground transition-colors">Privacy</a>
