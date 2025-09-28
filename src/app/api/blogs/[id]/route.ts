@@ -7,10 +7,11 @@ interface Params {
 }
 
 // GET a single blog by id
-export async function GET(req: NextRequest, { params }: Params) {
+export async function GET(req: NextRequest, context: { params: { id: string } }) {
+  const { id } = context.params;
   try {
     const blog = await prisma.blog.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         author: { select: { id: true, name: true } },
         likes: true,
@@ -29,13 +30,15 @@ export async function GET(req: NextRequest, { params }: Params) {
   }
 }
 
-// UPDATE a blog (PUT)
-export async function PUT(req: NextRequest, { params }: Params) {
+
+export async function PUT(req: NextRequest, context: { params: { id: string } }) {
+
+const { id } = context.params;
   try {
     const data = await req.json();
 
     const updatedBlog = await prisma.blog.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         title: data.title,
         content: data.content,
@@ -49,11 +52,11 @@ export async function PUT(req: NextRequest, { params }: Params) {
   }
 }
 
-// DELETE a blog
-export async function DELETE(req: NextRequest, { params }: Params) {
+export async function DELETE(req: NextRequest, context: { params: { id: string } }) {
+const { id } = context.params;
   try {
     await prisma.blog.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ success: true });
