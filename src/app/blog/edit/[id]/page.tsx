@@ -14,7 +14,7 @@ export default function EditBlogPage() {
 
   useEffect(() => {
     const fetchBlog = async () => {
-      const res = await fetch(`/api/blog/${blogId}`);
+      const res = await fetch(`/api/blogs/${blogId}`);
       const data = await res.json();
       if (res.ok) {
         setTitle(data.title);
@@ -29,7 +29,7 @@ export default function EditBlogPage() {
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = await fetch(`/api/blog/${blogId}`, {
+    const res = await fetch(`/api/blogs/${blogId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title, content }),

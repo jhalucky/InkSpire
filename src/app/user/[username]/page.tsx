@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 type Props = { params: { username: string } };
 
 export default async function UserProfilePage({ params }: Props) {
-  const { username } = params;
+  const { username } = await params;
 
   // Fetch user and their blogs from DB
   const user = await prisma.user.findUnique({
