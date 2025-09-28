@@ -5,7 +5,7 @@ import BlogCard from "./BlogCard";
 import { User } from "@prisma/client";
 
 interface Props {
-  blogs: any[]; // You can type it precisely
+  blogs: any[];
   currentUserId: string;
 }
 

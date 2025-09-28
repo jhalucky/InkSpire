@@ -34,8 +34,4 @@ export default async function UserProfilePage({ params }: Props) {
   instagramUrl={user.instagramUrl}
 />
 
-    
-      <UserBlogsClient blogs={user.blogs} />
-    </div>
-  );
-}
+<UserBlogsClient blogs={user.blogs} currentUserId={currentUserId} />
