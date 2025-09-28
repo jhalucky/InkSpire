@@ -5,8 +5,11 @@ interface Params {
   params: { id: string }; 
 }
 
-export async function GET(req: NextRequest, context: Params) {
-  const { id } = context.params;
+export async function GET(
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> } // params is a Promise now
+) {
+  const { id } = await context.params;
 
   try {
     const blog = await prisma.blog.findUnique({
