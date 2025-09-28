@@ -1,12 +1,12 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 interface Params {
-  params: { id: string }; // this is blog ID
+  params: { id: string }; 
 }
 
-export async function GET(req: Request, { params }: Params) {
-  const { id } = params;
+export async function GET(req: NextRequest, context: Params) {
+  const { id } = context.params;
 
   try {
     const blog = await prisma.blog.findUnique({
