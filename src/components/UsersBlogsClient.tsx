@@ -1,33 +1,20 @@
-// src/components/UserBlogsClient.tsx
+// UserBlogsClient.tsx
 "use client";
 
-import BlogCard from "./BlogCard";
-import { User } from "@prisma/client";
+import { useSession } from "next-auth/react";
 
-interface Props {
-  blogs: any[];
-  currentUserId: string;
-}
-
-export default function UserBlogsClient({ blogs, currentUserId }: Props) {
-  const handleTipClick = (blog: typeof blogs[0]) => {
-    console.log("Tip clicked for blog:", blog.id);
-  };
+export default function UserBlogsClient({ blogs }: { blogs: any[] }) {
+  const { data: session } = useSession();
+  const currentUserId = session?.user?.id ?? "";
 
   return (
-    <div className="space-y-6">
-      {blogs.length === 0 ? (
-        <p className="text-gray-700 dark:text-gray-300">No blogs yet.</p>
-      ) : (
-        blogs.map((blog) => (
-          <BlogCard
-            key={blog.id}
-            blog={{ ...blog, comments: blog.comments ?? [] }}
-            currentUserId={currentUserId}
-            onTipClick={handleTipClick}
-          />
-        ))
-      )}
+    <div>
+      {blogs.map(blog => (
+        <div key={blog.id}>
+          <h3>{blog.title}</h3>
+          {/* Use currentUserId here if needed */}
+        </div>
+      ))}
     </div>
   );
 }
