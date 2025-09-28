@@ -41,7 +41,7 @@ export default function BlogPage() {
 
   // Function to simulate reading time logic for display (based on word count/Prisma date)
   const getMetadata = () => {
-    const minutes = Math.ceil(blog.content.length / 500); // 500 chars/min is a rough estimate
+    const minutes = Math.ceil(blog.content.length / 500); 
     const date = new Date(blog.createdAt);
     return {
       readingTime: `~${minutes} min read`,
