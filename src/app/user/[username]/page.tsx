@@ -35,3 +35,8 @@ export default async function UserProfilePage({ params }: Props) {
 />
 
 <UserBlogsClient blogs={user.blogs} currentUserId={currentUserId} />
+</div>
+
+);
+};
+
