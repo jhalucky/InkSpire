@@ -1,15 +1,14 @@
 // src/app/api/user/[id]/blogs/route.ts
 import { prisma } from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 const fallbackImage = "https://cdn-icons-png.flaticon.com/512/1144/1144760.png";
 
 export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> } // params is a Promise now
 ) {
-  const { id } = params;
-
+  const { id } = await context.params;
   try {
     const user = await prisma.user.findUnique({
       where: { id },
