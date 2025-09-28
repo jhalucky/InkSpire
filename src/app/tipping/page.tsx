@@ -1,63 +1,5 @@
 "use client";
 
-// import { useSearchParams, useRouter } from "next/navigation";
-// import { useEffect, useState } from "react";
-// import TippingSystem from "@/components/TippingSystem";
-// import { toast } from "sonner";
-
-// export default function TippingPage() {
-//   const searchParams = useSearchParams();
-//   const router = useRouter();
-//   const authorId = searchParams.get("authorId");
-
-//   const [authorUpiId, setAuthorUpiId] = useState<string | null>(null);
-
-//   useEffect(() => {
-//     if (!authorId) return;
-
-//     // Fetch only the UPI ID from backend
-//     fetch(`/api/user/${authorId}`, { cache: "no-store" })
-//       .then((res) => res.json())
-//       .then((data) => {
-//         console.log("Fetched data:", data);
-//         if (data?.upiId) {
-//           setAuthorUpiId(data.upiId);
-//         } else {
-//           toast.error("Author UPI ID is missing ❌"); // ✅ show toast instead of console.error
-//         }
-//       })
-//       .catch((err) => {
-//         console.error("Error fetching author UPI:", err);
-//         toast.error("Failed to fetch author details ❌"); // optional: handle fetch errors
-//       });
-//   }, [authorId]);
-
-//   if (!authorId) {
-//     return (
-//       <p className="text-red-500 text-center mt-10">
-//         Author ID missing. Cannot tip.
-//       </p>
-//     );
-//   }
-
-//   if (!authorUpiId) {
-//     return <p className="text-center mt-10">Loading author details...</p>;
-//   }
-
-//   return (
-//     <TippingSystem
-//       authorId={authorId}
-//       authorUpiId={authorUpiId}
-//       onClose={() => router.push("/blogs")}
-//     />
-//   );
-// }
-
-
-
-// src/app/tipping/page.tsx (client)
-"use client";
-
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import TippingSystem from "@/components/TippingSystem";
@@ -100,7 +42,7 @@ export default function TippingPage() {
             const json = await res.json();
             if (json?.error) msg = json.error;
           } catch {
-            /* ignore parse error */
+            
           }
           setError(msg);
           toast.error(msg);
@@ -128,8 +70,7 @@ export default function TippingPage() {
     return () => ctrl.abort();
   }, [authorId]);
 
-  // Make sure the Toaster is present so toast messages appear.
-  // If you've already added <Toaster /> in root layout, leaving it here won't hurt.
+
   if (loading) {
     return (
       <>
@@ -152,16 +93,15 @@ export default function TippingPage() {
           <div className="flex gap-3">
             <button
               onClick={() => router.push("/blogs")}
-              className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
+              className="px-4 py-2 rounded bg-white text-black hover:bg-gray-300"
             >
               Back to blogs
             </button>
             <button
               onClick={() => {
-                // simple retry: reload the page (keeps query param)
                 window.location.reload();
               }}
-              className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
+              className="px-4 py-2 rounded bg-black text-white hover:bg-gray-300"
             >
               Retry
             </button>
@@ -171,7 +111,6 @@ export default function TippingPage() {
     );
   }
 
-  // If we have a UPI, render the tipping UI
   return (
     <>
       <Toaster position="top-right" />
