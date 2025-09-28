@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import ReadingModes from "@/components/ReadingModes";
-import { Heart, MessageSquare } from "lucide-react"; // Imported for visual display
+import { Heart, MessageSquare } from "lucide-react";
 
 type Blog = {
   id: string;
@@ -12,8 +12,8 @@ type Blog = {
   content: string;
   createdAt: string;
   author: { name: string | null; username: string | null; image: string | null };
-  comments: { id: string; content: string; author: { name: string | null; image: string | null } }[];
-  likes: { id: string }[];
+  comments: { id: string; content: string; author: { name: string | null; image: string | null } }[] | undefined;
+  likes: { id: string }[] | undefined;
 };
 
 export default function BlogPage() {
@@ -45,7 +45,7 @@ export default function BlogPage() {
     const date = new Date(blog.createdAt);
     return {
       readingTime: `~${minutes} min read`,
-      publishedAt: date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
+      publishedAt: date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }),
     };
   };
 
@@ -53,7 +53,6 @@ export default function BlogPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-12 bg-black text-white min-h-screen">
-      
       {/* Author Info */}
       <div className="flex items-center gap-4 mb-8">
         {blog.author.image ? (
@@ -74,8 +73,8 @@ export default function BlogPage() {
           <p className="text-sm text-gray-400">@{blog.author.username || "unknown"}</p>
         </div>
       </div>
-      
-      {/* Post Title & Metadata (THE MAIN DISPLAY) */}
+
+      {/* Post Title & Metadata */}
       <div className="mb-10">
         <h1 className="text-4xl font-extrabold mb-3">{blog.title}</h1>
         <div className="flex gap-4 text-sm text-gray-500">
@@ -86,7 +85,6 @@ export default function BlogPage() {
       </div>
 
       {/* Reading Modes & Controls */}
-      {/* NOTE: ReadingModes will handle the display of the CONTENT itself */}
       <div className="mb-20 pb-4 border">
         <ReadingModes
           content={blog.content}
@@ -99,19 +97,19 @@ export default function BlogPage() {
       {/* Action Bar (Likes & Comments Count) */}
       <div className="flex gap-8 text-gray-400 text-base py-4 border border-gray-700">
         <span className="flex items-center gap-2 font-medium ml-5">
-            <Heart className="w-5 h-5 text-red-500 fill-red-500/20" /> 
-            {blog.likes.length} Likes
+          <Heart className="w-5 h-5 text-red-500 fill-red-500/20" />
+          {(blog.likes?.length ?? 0)} Likes
         </span>
         <span className="flex items-center gap-2 font-medium">
-            <MessageSquare className="w-5 h-5" /> 
-            {blog.comments.length} Comments
+          <MessageSquare className="w-5 h-5" />
+          {(blog.comments?.length ?? 0)} Comments
         </span>
       </div>
 
       {/* Comments Section */}
       <div className="mt-12">
-        <h2 className="text-2xl font-bold mb-6">Comments ({blog.comments.length})</h2>
-        {blog.comments.length === 0 ? (
+        <h2 className="text-2xl font-bold mb-6">Comments ({blog.comments?.length ?? 0})</h2>
+        {!blog.comments || blog.comments.length === 0 ? (
           <p className="text-gray-500">No comments yet. Be the first to start a discussion!</p>
         ) : (
           <ul className="space-y-6">

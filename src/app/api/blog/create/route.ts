@@ -6,12 +6,17 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user) 
+    if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-    const { title, content } = await req.json();
+    const { title, content, coverimage } = await req.json();
 
-    // Make sure email exists
+    if (!title || !content) {
+      return NextResponse.json({ error: "Title and content are required" }, { status: 400 });
+    }
+
+    // fallback if user email missing
     const email = session.user.email;
     if (!email) {
       return NextResponse.json({ error: "User email is missing" }, { status: 400 });
@@ -21,13 +26,14 @@ export async function POST(req: Request) {
       data: {
         title,
         content,
-        author: { connect: { email } }, // email is now guaranteed to be a string
+        coverimage: coverimage || "https://cdn-icons-png.flaticon.com/512/1144/1144760.png", // default
+        author: { connect: { email } },
       },
     });
 
-    return NextResponse.json(post);
+    return NextResponse.json(post, { status: 201 });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    console.error("Error creating blog:", err);
+    return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });
   }
 }
-

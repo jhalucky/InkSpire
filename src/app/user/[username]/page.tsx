@@ -1,16 +1,13 @@
-// src/app/user/[username]/page.tsx
-import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import ProfileCard from "@/components/ProfileCard";
 import UserBlogsClient from "@/components/UsersBlogsClient";
+import { prisma } from "@/lib/prisma";
 
 type Props = { params: { username: string } };
 
 export default async function UserProfilePage({ params }: Props) {
   const { username } = params;
-  const session = await getServerSession(authOptions);
-  const currentUserId = session?.user?.id ?? "";
 
+  // Fetch user and their blogs from DB
   const user = await prisma.user.findUnique({
     where: { username },
     include: {
@@ -24,11 +21,21 @@ export default async function UserProfilePage({ params }: Props) {
   if (!user) return <p>User not found</p>;
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      {/* Profile info here (Image, Name, Socials) */}
-      
-      {/* Blogs */}
-      <UserBlogsClient blogs={user.blogs} currentUserId={currentUserId} />
+    <div className="max-w-4xl mx-auto p-6 space-y-12">
+      {/* Profile Card */}
+      <ProfileCard
+  name={user.name}
+  username={user.username}
+  image={user.image}
+  bio={user.bio}
+  twitterUrl={user.twitterUrl}
+  githubUrl={user.githubUrl}
+  linkedinUrl={user.linkedinUrl}
+  instagramUrl={user.instagramUrl}
+/>
+
+    
+      <UserBlogsClient blogs={user.blogs} />
     </div>
   );
 }

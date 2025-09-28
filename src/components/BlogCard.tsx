@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
-import { Heart, Coffee, MessageSquare, MoreVertical } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Heart, Coffee, MessageSquare } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const fallbackImage = "https://cdn-icons-png.flaticon.com/512/1144/1144760.png";
@@ -12,6 +12,7 @@ type Blog = {
   id: string;
   title: string;
   content: string;
+  coverimage?: string | null;
   authorId: string;
   author: { name?: string | null; username?: string | null; image?: string | null } | null;
   likes?: { id: string }[];
@@ -35,8 +36,12 @@ export default function BlogCard({
   const [comment, setComment] = useState("");
   const [comments, setComments] = useState(blog.comments ?? []);
   const [likes, setLikes] = useState(blog.likes ?? []);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [showInteractiveFeatures, setShowInteractiveFeatures] = useState(false);
+
+  // Log coverimage to debug DB vs fallback
+  useEffect(() => {
+    console.log(`Blog ID: ${blog.id}, coverimage from API:`, blog.coverimage ?? fallbackImage);
+  }, [blog.coverimage, blog.id]);
 
   const handleCommentSubmit = async () => {
     if (!comment.trim()) return;
@@ -67,21 +72,6 @@ export default function BlogCard({
     }
   };
 
-  const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this blog?")) return;
-    try {
-      const res = await fetch(`/api/blogs/${blog.id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to delete blog");
-      router.refresh();
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleEdit = () => {
-    router.push(`/blog/create?id=${blog.id}`);
-  };
-
   return (
     <article className="group relative card-modern hover-lift animate-fade-in-up overflow-hidden">
       <div className="p-6">
@@ -96,7 +86,6 @@ export default function BlogCard({
                 height={48}
                 className="w-12 h-12 rounded-full object-cover border-2 border-border group-hover/avatar:border-indigo-500 transition-all duration-300 group-hover/avatar:scale-110"
               />
-              <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full opacity-0 group-hover/avatar:opacity-20 transition-opacity duration-300 blur"></div>
             </div>
           </Link>
           <div className="min-w-0 flex-1">
@@ -109,6 +98,17 @@ export default function BlogCard({
               @{blog.author?.username ?? "unknown"}
             </p>
           </div>
+        </div>
+
+        {/* Cover Image */}
+        <div className="mb-6">
+          <Image
+            src={blog.coverimage && blog.coverimage.trim() !== "" ? blog.coverimage : fallbackImage}
+            alt={blog.title}
+            width={800}
+            height={400}
+            className="w-full max-h-80 object-cover rounded-lg"
+          />
         </div>
 
         {/* Title & Content */}
@@ -124,70 +124,56 @@ export default function BlogCard({
         </div>
 
         {/* Actions */}
-        <div
-  className="
-    grid grid-cols-2 gap-3 text-center
-    md:flex md:flex-row md:items-center md:justify-between md:gap-0
-  "
->
-  {/* Like */}
-  <button
-    onClick={handleLike}
-    className={`flex justify-center items-center gap-2 px-3 py-2 rounded-lg transition-colors w-full ${
-      likes.some((l) => l.id === currentUserId)
-        ? "text-red-500 bg-red-50 dark:bg-red-950/20"
-        : "text-muted-foreground hover:text-foreground hover:bg-accent"
-    }`}
-  >
-    <Heart
-      className={`w-4 h-4 ${
-        likes.some((l) => l.id === currentUserId) ? "fill-current" : ""
-      }`}
-    />
-    <span className="text-sm font-medium">{likes.length}</span>
-  </button>
+        <div className="grid grid-cols-2 gap-3 text-center md:flex md:flex-row md:items-center md:justify-between md:gap-0">
+          {/* Like */}
+          <button
+            onClick={handleLike}
+            className={`flex justify-center items-center gap-2 px-3 py-2 rounded-lg transition-colors w-full ${
+              likes.some((l) => l.id === currentUserId)
+                ? "text-red-500 bg-red-50 dark:bg-red-950/20"
+                : "text-muted-foreground hover:text-foreground hover:bg-accent"
+            }`}
+          >
+            <Heart
+              className={`w-4 h-4 ${likes.some((l) => l.id === currentUserId) ? "fill-current" : ""}`}
+            />
+            <span className="text-sm font-medium">{likes.length}</span>
+          </button>
 
-  {/* Interactive */}
-  <button
-    onClick={() => setShowInteractiveFeatures(!showInteractiveFeatures)}
-    className="flex justify-center items-center gap-2 px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors w-full"
-  >
-    <MessageSquare className="w-4 h-4" />
-    <span className="text-[10px] md:text-sm">Interactive</span>
-  </button>
+          {/* Interactive */}
+          <button
+            onClick={() => setShowInteractiveFeatures(!showInteractiveFeatures)}
+            className="flex justify-center items-center gap-2 px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors w-full"
+          >
+            <MessageSquare className="w-4 h-4" />
+            <span className="text-[10px] md:text-sm">Interactive</span>
+          </button>
 
-  {/* Tip Author */}
-  <button
-    onClick={() => router.push(`/tipping?authorId=${blog.authorId}`)}
-    className="inline-flex justify-center items-center gap-2 px-1 md:px-4 py-2 md:py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all duration-300 shadow-lg hover:shadow-xl w-full"
-  >
-    <Coffee className="w-4 h-4" />
-    <span className="text-sm">Tip Author</span>
-  </button>
+          {/* Tip Author */}
+          <button
+            onClick={() => router.push(`/tipping?authorId=${blog.authorId}`)}
+            className="inline-flex justify-center items-center gap-2 px-1 md:px-4 py-2 md:py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all duration-300 shadow-lg hover:shadow-xl w-full"
+          >
+            <Coffee className="w-4 h-4" />
+            <span className="text-sm">Tip Author</span>
+          </button>
 
-  {/* Read More */}
-  <Link
-    href={`/blog/${blog.id}`}
-    className="inline-flex justify-center items-center text-sm font-medium text-primary hover:text-primary/80 transition-colors w-full"
-  >
-    Read More
-    <svg
-      className="w-4 h-4 ml-1"
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M9 5l7 7-7 7"
-      />
-    </svg>
-  </Link>
-</div>
-
-
+          {/* Read More */}
+          <Link
+            href={`/blog/${blog.id}`}
+            className="inline-flex justify-center items-center text-sm font-medium text-primary hover:text-primary/80 transition-colors w-full"
+          >
+            Read More
+            <svg
+              className="w-4 h-4 ml-1"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
+        </div>
       </div>
     </article>
   );

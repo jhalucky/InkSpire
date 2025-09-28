@@ -74,13 +74,14 @@ const ConfirmModal = ({
   </div>
 );
 
-// ------------------ PROFILE CARD ------------------
+// ------------------ HELPERS ------------------
 const extractUsername = (url: string | null | undefined) => {
   if (!url) return "Not Set";
-  const segments = url.split("/").filter(Boolean);
-  return segments[segments.length - 1] ? `@${segments[segments.length - 1]}` : "Not Set";
+  const parts = url.split("/").filter(Boolean);
+  return parts.length ? `@${parts[parts.length - 1]}` : "Not Set";
 };
 
+// ------------------ PROFILE CARD ------------------
 const ProfileCard = ({ session }: { session: any }) => {
   const user = session.user;
   const [imageUrl, setImageUrl] = useState(user.image);
@@ -91,11 +92,10 @@ const ProfileCard = ({ session }: { session: any }) => {
 
   const renderSocialIcon = (url: string | null | undefined, type: string) => {
     const username = extractUsername(url);
-    const isSet = username !== "Not Set";
     return (
       <div className="flex items-center gap-2">
         {socialSvgs[type]}
-        {isSet ? (
+        {username !== "Not Set" ? (
           <a
             href={url!}
             target="_blank"
@@ -167,57 +167,55 @@ export default function ProfilePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [blogs, setBlogs] = useState<any[]>([]);
-  const [loadingBlogs, setLoadingBlogs] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [showModal, setShowModal] = useState(false);
 
   // Redirect if not authenticated
   useEffect(() => {
     if (status === "unauthenticated") router.push("/signin");
   }, [status, router]);
 
-  // Fetch blogs
+  // Fetch user blogs
   useEffect(() => {
+    if (!session?.user?.id) return;
+
     const fetchBlogs = async () => {
-      if (!session?.user?.id) return;
       try {
-        const res = await fetch(`/api/users/${session.user.id}/blogs`);
+        const res = await fetch(`/api/user/${session.user.id}/blogs`);
         if (!res.ok) throw new Error("Failed to fetch blogs");
+
         const data = await res.json();
-        setBlogs(data);
+        const blogsData = (data.blogs || []).map((b: any) => ({
+          ...b,
+          coverimage: b.coverimage || "https://cdn-icons-png.flaticon.com/512/1144/1144760.png",
+        }));
+
+        setBlogs(blogsData);
       } catch (err) {
         console.error(err);
         setBlogs([]);
       } finally {
-        setLoadingBlogs(false);
+        setLoading(false);
       }
     };
+
     fetchBlogs();
   }, [session?.user?.id]);
 
   // Delete blog
-  const handleDeleteClick = (id: string) => {
-    setDeleteId(id);
-    setShowModal(true);
-  };
-
-  const handleConfirmDelete = async () => {
+  const confirmDelete = async () => {
     if (!deleteId) return;
     try {
       const res = await fetch(`/api/blogs/${deleteId}`, { method: "DELETE" });
       const data = await res.json();
-      if (data.success) setBlogs(blogs.filter((b) => b.id !== deleteId));
+      if (data.success) {
+        setBlogs((prev) => prev.filter((b) => b.id !== deleteId));
+      }
     } catch (err) {
       console.error(err);
     } finally {
       setDeleteId(null);
-      setShowModal(false);
     }
-  };
-
-  const handleCancelDelete = () => {
-    setDeleteId(null);
-    setShowModal(false);
   };
 
   if (status === "loading" || !session) {
@@ -236,7 +234,7 @@ export default function ProfilePage() {
         <div className="max-w-3xl mx-auto mt-10 space-y-6">
           <h2 className="text-2xl font-semibold text-gray-800">Your Blogs</h2>
 
-          {loadingBlogs ? (
+          {loading ? (
             <p className="text-center text-gray-500">Loading blogs...</p>
           ) : blogs.length > 0 ? (
             blogs.map((blog) => (
@@ -244,7 +242,7 @@ export default function ProfilePage() {
                 key={blog.id}
                 blog={blog}
                 currentUserId={session.user.id}
-                onDelete={handleDeleteClick}
+                onDelete={(id) => setDeleteId(id)}
               />
             ))
           ) : (
@@ -252,11 +250,11 @@ export default function ProfilePage() {
           )}
         </div>
 
-        {showModal && (
+        {deleteId && (
           <ConfirmModal
             message="Are you sure you want to delete this blog?"
-            onConfirm={handleConfirmDelete}
-            onCancel={handleCancelDelete}
+            onConfirm={confirmDelete}
+            onCancel={() => setDeleteId(null)}
           />
         )}
       </div>

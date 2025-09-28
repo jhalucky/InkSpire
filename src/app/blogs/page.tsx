@@ -10,7 +10,7 @@ type Blog = {
   title: string;
   content: string;
   author: {
-    id?: string;
+    id?: string;  
     name?: string | null; 
     username?: string | null;
     image?: string | null;

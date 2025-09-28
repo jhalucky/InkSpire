@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,34 +8,30 @@ datasource db {
 }
 
 model User {
-  id               String    @id @default(cuid())
+  id               String     @id @default(cuid())
   name             String?
-  username         String?   @unique
-  email            String    @unique
+  username         String?    @unique
+  email            String     @unique
   emailVerified    DateTime?
+  image            String?
   bio              String?
   profession       String?
   education        String?
-  image            String?
   missionstatement String?
-  twitterUrl       String?   
+  twitterUrl       String?
   githubUrl        String?
   instagramUrl     String?
   linkedinUrl      String?
-  // Tipping details
   upiId            String?
   upiName          String?
-  upiVerified      Boolean   @default(false)
+  upiVerified      Boolean    @default(false)
   accounts         Account[]
-  sessions         Session[]
-  
-  // Tipping relations
-  tipsGiven        Tip[]     @relation("TipsGiven")
-  tipsReceived     Tip[]     @relation("TipsReceived")
-  // Blog relations
   blogs            Blog[]
   blogLikes        BlogLike[]
   comments         Comment[]
+  sessions         Session[]
+  tipsGiven        Tip[]      @relation("TipsGiven")
+  tipsReceived     Tip[]      @relation("TipsReceived")
 }
 
 model Account {
@@ -68,23 +61,24 @@ model Session {
 }
 
 model Blog {
-  id        String     @id @default(cuid())
-  title     String
-  content   String
-  authorId  String
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  author    User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  likes     BlogLike[]
-  comments  Comment[]
+  id         String     @id @default(cuid())
+  title      String
+  content    String
+  authorId   String
+  coverimage String?  @default("https://cdn-icons-png.flaticon.com/512/1144/1144760.png") 
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  author     User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  likes      BlogLike[]
+  comments   Comment[]
 }
 
 model BlogLike {
-  id      String @id @default(cuid())
-  blogId  String
-  userId  String
-  blog    Blog   @relation(fields: [blogId], references: [id], onDelete: Cascade)
-  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  userId String
+  blogId String
+  blog   Blog   @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Comment {
@@ -99,14 +93,12 @@ model Comment {
 }
 
 model Tip {
-  id          String   @id @default(cuid())
-  amount      Float
-  message     String?
-  createdAt   DateTime @default(now())
-  
-  fromUser    User     @relation("TipsGiven", fields: [fromUserId], references: [id], onDelete: Cascade)
-  fromUserId  String
-  
-  toUser      User     @relation("TipsReceived", fields: [toUserId], references: [id], onDelete: Cascade)
-  toUserId    String
+  id         String   @id @default(cuid())
+  amount     Float
+  message    String?
+  createdAt  DateTime @default(now())
+  fromUserId String
+  toUserId   String
+  fromUser   User     @relation("TipsGiven", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUser     User     @relation("TipsReceived", fields: [toUserId], references: [id], onDelete: Cascade)
 }

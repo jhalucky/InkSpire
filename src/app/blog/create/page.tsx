@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import AIWritingAssistant from "@/components/AIWritingAssistant";
 import SocialSnippets from "@/components/SocialSnippets";
 import AICoverImageGenerator from "@/components/AICoverImageGenerator";
@@ -11,11 +11,12 @@ export default function CreateBlogPage({ blog }: { blog?: any }) {
   const { data: session, status } = useSession();
   const router = useRouter();
 
+  const contentRef = useRef<HTMLDivElement>(null);
+
   const [title, setTitle] = useState(blog?.title || "");
-  const [content, setContent] = useState(blog?.content || "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [coverImage, setCoverImage] = useState(blog?.coverImage || "");
+  const [coverimage, setCoverimage] = useState(blog?.coverimage || "");
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -23,20 +24,10 @@ export default function CreateBlogPage({ blog }: { blog?: any }) {
     }
   }, [status, router]);
 
-
-  const applyFormat = (syntax: string, closingSyntax?: string) => {
-    const textarea = document.getElementById("content") as HTMLTextAreaElement;
-    if (!textarea) return;
-
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selectedText = textarea.value.substring(start, end);
-
-    const before = textarea.value.substring(0, start);
-    const after = textarea.value.substring(end);
-
-    const newText = `${before}${syntax}${selectedText}${closingSyntax || syntax}${after}`;
-    setContent(newText);
+  // Format selection inside contentEditable without losing cursor
+  const applyFormat = (command: string, value?: string) => {
+    contentRef.current?.focus();
+    document.execCommand(command, false, value);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -51,7 +42,8 @@ export default function CreateBlogPage({ blog }: { blog?: any }) {
         body: JSON.stringify({
           id: blog?.id,
           title,
-          content,
+          content: contentRef.current?.innerHTML,
+          coverimage,
         }),
       });
 
@@ -88,107 +80,132 @@ export default function CreateBlogPage({ blog }: { blog?: any }) {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Title Input */}
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Title
-              </label>
+              <h1 className="text-2xl font-bold mb-3">Title</h1>
               <input
                 type="text"
+                placeholder="Enter blog title..."
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                required
-                className="w-full px-4 py-3 rounded-lg bg-background border border-input focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent text-foreground placeholder:text-muted-foreground"
-                placeholder="Enter your blog title"
+                className="w-full px-3 py-2 mb-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
-            <div>
+            {/* Cover Image Upload */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-foreground mb-1">
+                Cover Image
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onload = () => setCoverimage(reader.result as string);
+                    reader.readAsDataURL(file);
+                  }
+                }}
+                className="mb-2 bg-gray-300 text-black rounded border-xl"
+              />
+              {coverimage && (
+                <img
+                  src={coverimage}
+                  alt="Cover"
+                  className="w-full max-h-60 object-cover rounded-md mt-2"
+                />
+              )}
+            </div>
+
+            {/* Content Toolbar */}
+            <div className="mb-3">
               <label className="block text-sm font-medium text-foreground mb-2">
                 Content
               </label>
-              
-              {/* Enhanced Toolbar */}
               <div className="flex flex-wrap gap-2 mb-3 p-3 bg-muted/50 rounded-lg border border-border">
-                <button 
-                  type="button" 
-                  onClick={() => applyFormat("**")} 
-                  className="px-3 py-2 bg-background border border-input rounded-md text-sm font-medium hover:bg-accent transition-colors"
+                <button
+                  type="button"
+                  onClick={() => applyFormat("bold")}
+                  className="px-3 py-2 bg-background border border-input rounded-md text-sm font-bold hover:bg-accent transition-colors"
                 >
-                  <strong>B</strong>
+                  B
                 </button>
-                <button 
-                  type="button" 
-                  onClick={() => applyFormat("*")} 
-                  className="px-3 py-2 bg-background border border-input rounded-md text-sm font-medium italic hover:bg-accent transition-colors"
+                <button
+                  type="button"
+                  onClick={() => applyFormat("italic")}
+                  className="px-3 py-2 bg-background border border-input rounded-md text-sm italic hover:bg-accent transition-colors"
                 >
-                  <em>I</em>
+                  I
                 </button>
-                <button 
-                  type="button" 
-                  onClick={() => applyFormat("~~")} 
-                  className="px-3 py-2 bg-background border border-input rounded-md text-sm font-medium hover:bg-accent transition-colors"
+                <button
+                  type="button"
+                  onClick={() => applyFormat("strikeThrough")}
+                  className="px-3 py-2 bg-background border border-input rounded-md text-sm line-through hover:bg-accent transition-colors"
                 >
-                  <s>S</s>
+                  S
                 </button>
-                <button 
-                  type="button" 
-                  onClick={() => applyFormat("# ", "")} 
-                  className="px-3 py-2 bg-background border border-input rounded-md text-sm font-medium hover:bg-accent transition-colors"
+                <button
+                  type="button"
+                  onClick={() => applyFormat("formatBlock", "H1")}
+                  className="px-3 py-2 bg-background border border-input rounded-md text-sm hover:bg-accent transition-colors"
                 >
                   H1
                 </button>
-                <button 
-                  type="button" 
-                  onClick={() => applyFormat("## ", "")} 
-                  className="px-3 py-2 bg-background border border-input rounded-md text-sm font-medium hover:bg-accent transition-colors"
+                <button
+                  type="button"
+                  onClick={() => applyFormat("formatBlock", "H2")}
+                  className="px-3 py-2 bg-background border border-input rounded-md text-sm hover:bg-accent transition-colors"
                 >
                   H2
                 </button>
-                <button 
-                  type="button" 
-                  onClick={() => applyFormat("### ", "")} 
-                  className="px-3 py-2 bg-background border border-input rounded-md text-sm font-medium hover:bg-accent transition-colors"
+                <button
+                  type="button"
+                  onClick={() => applyFormat("formatBlock", "H3")}
+                  className="px-3 py-2 bg-background border border-input rounded-md text-sm hover:bg-accent transition-colors"
                 >
                   H3
                 </button>
-                <button 
-                  type="button" 
-                  onClick={() => applyFormat("> ", "")} 
-                  className="px-3 py-2 bg-background border border-input rounded-md text-sm font-medium hover:bg-accent transition-colors"
-                >
-                  Quote
-                </button>
-                <button 
-                  type="button" 
-                  onClick={() => applyFormat("- ", "")} 
-                  className="px-3 py-2 bg-background border border-input rounded-md text-sm font-medium hover:bg-accent transition-colors"
+                <button
+                  type="button"
+                  onClick={() => applyFormat("insertUnorderedList")}
+                  className="px-3 py-2 bg-background border border-input rounded-md text-sm hover:bg-accent transition-colors"
                 >
                   List
                 </button>
-              </div>
-
-              <textarea
-                id="content"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                required
-                rows={15}
-                className="w-full px-4 py-3 rounded-lg bg-background border border-input focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent text-foreground placeholder:text-muted-foreground resize-none"
-                placeholder="Write your blog here... Use the toolbar above to format your text with markdown."
-              />
-              
-              <div className="mt-2 text-xs text-muted-foreground">
-                {content.length} characters
+                <button
+                  type="button"
+                  onClick={() => applyFormat("formatBlock", "BLOCKQUOTE")}
+                  className="px-3 py-2 bg-background border border-input rounded-md text-sm hover:bg-accent transition-colors"
+                >
+                  Quote
+                </button>
               </div>
             </div>
 
+            {/* WYSIWYG Content Box */}
+            <div
+              ref={contentRef}
+              id="content"
+              contentEditable
+              suppressContentEditableWarning
+              className="w-full min-h-[300px] px-4 py-3 rounded-lg bg-background border border-input focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground prose prose-invert"
+              dangerouslySetInnerHTML={{ __html: blog?.content || "" }}
+            />
+
+            <div className="mt-2 text-xs text-muted-foreground">
+            {(contentRef.current?.innerText?.length ?? 0)} characters
+            </div>
+
             {/* AI Writing Assistant */}
-            <AIWritingAssistant 
-              content={content}
+            <AIWritingAssistant
+              content={contentRef.current?.innerHTML || ""}
               title={title}
               onSuggestionApply={(suggestion) => {
-                // Apply suggestion to content
-                setContent((prev: string) => prev + '\n\n' + suggestion);
+                if (contentRef.current) {
+                  contentRef.current.innerHTML += `<p>${suggestion}</p>`;
+                }
               }}
             />
 
@@ -196,22 +213,23 @@ export default function CreateBlogPage({ blog }: { blog?: any }) {
             {title && (
               <AICoverImageGenerator
                 title={title}
-                content={content}
-                onImageGenerated={(imageUrl) => setCoverImage(imageUrl)}
+                content={contentRef.current?.innerHTML || ""}
+                onImageGenerated={(imageUrl) => setCoverimage(imageUrl)}
               />
             )}
 
             {/* Social Media Snippets */}
-            {title && content && (
+            {title && contentRef.current?.innerHTML && (
               <SocialSnippets
                 title={title}
-                content={content}
+                content={contentRef.current?.innerHTML || ""}
                 authorName={session?.user?.name || "Author"}
                 authorUsername={session?.user?.username || "author"}
-                blogUrl={`https://inkspire.com/blog/${blog?.id || 'new'}`}
+                blogUrl={`https://inkspire.com/blog/${blog?.id || "new"}`}
               />
             )}
 
+            {/* Submit / Cancel */}
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <button
                 type="submit"
@@ -220,7 +238,7 @@ export default function CreateBlogPage({ blog }: { blog?: any }) {
               >
                 {loading ? "Saving..." : blog ? "Update Blog" : "Publish Blog"}
               </button>
-              
+
               <button
                 type="button"
                 className="flex-1 sm:flex-none sm:px-8 py-3 bg-muted text-muted-foreground font-semibold rounded-lg hover:bg-accent transition-colors"
