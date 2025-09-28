@@ -3,14 +3,7 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import TippingSystem from "@/components/TippingSystem";
-
-
-interface TippingPageProps {
-  authorId: string;
-  authorName: string;
-  authorImage: string;
-  onTip: (amount: number, message: string) => void;
-}
+import { toast } from "sonner";
 
 export default function TippingPage() {
   const searchParams = useSearchParams();
@@ -30,10 +23,13 @@ export default function TippingPage() {
         if (data?.upiId) {
           setAuthorUpiId(data.upiId);
         } else {
-          console.error("Author UPI ID missing");
+          toast.error("Author UPI ID is missing ❌"); // ✅ show toast instead of console.error
         }
       })
-      .catch((err) => console.error("Error fetching author UPI:", err));
+      .catch((err) => {
+        console.error("Error fetching author UPI:", err);
+        toast.error("Failed to fetch author details ❌"); // optional: handle fetch errors
+      });
   }, [authorId]);
 
   if (!authorId) {
@@ -49,7 +45,7 @@ export default function TippingPage() {
   }
 
   return (
-    <TippingSystem  
+    <TippingSystem
       authorId={authorId}
       authorUpiId={authorUpiId}
       onClose={() => router.push("/blogs")}
