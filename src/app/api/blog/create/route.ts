@@ -19,11 +19,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
+  
+    let coverimageData = coverimage;
+    if (coverimage && coverimage.startsWith("data:")) {
+      coverimageData = coverimage;
+    }
+
     const blog = await prisma.blog.create({
       data: {
         title,
         content,
-        coverimage: coverimage || "/inkspire.png",
+        coverimage: coverimageData || "/inkspire.png", 
         author: { connect: { email: session.user.email! } },
       },
     });
