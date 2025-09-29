@@ -6,6 +6,7 @@ import { useState, useEffect, useRef } from "react";
 import AIWritingAssistant from "@/components/AIWritingAssistant";
 import SocialSnippets from "@/components/SocialSnippets";
 import AICoverImageGenerator from "@/components/AICoverImageGenerator";
+import toast from "react-hot-toast";
 
 export default function CreateBlogPage({ blog }: { blog?: any }) {
   const { data: session, status } = useSession();
@@ -37,7 +38,7 @@ export default function CreateBlogPage({ blog }: { blog?: any }) {
 
     try {
       const res = await fetch(blog ? "/api/blog/update" : "/api/blog/create", {
-        method: "POST",
+        method: blog? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           id: blog?.id,
@@ -98,18 +99,34 @@ export default function CreateBlogPage({ blog }: { blog?: any }) {
                 Cover Image
               </label>
               <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    const reader = new FileReader();
-                    reader.onload = () => setCoverimage(reader.result as string);
-                    reader.readAsDataURL(file);
-                  }
-                }}
-                className="mb-2 bg-gray-300 text-black rounded border-xl"
-              />
+  type="file"
+  accept="image/*"
+  onChange={async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error("Upload failed");
+
+      const data = await res.json();
+      setCoverimage(data.filePath);
+
+      toast.success("Cover image uploaded 🎉");
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Upload failed ❌");
+    }
+  }}
+  className="mb-2 bg-gray-300 text-black rounded border-xl"
+/>
               {coverimage && (
                 <img
                   src={coverimage}

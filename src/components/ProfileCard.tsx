@@ -66,7 +66,7 @@ export default function ProfileCard({
   instagramUrl,
 }: ProfileCardProps) {
   return (
-    <div className="flex flex-col md:flex-row items-center md:items-start gap-6 bg-gray-900 p-6 rounded-lg text-white">
+    <div className="flex flex-col md:flex-row md:items-center md:items-start gap-6 p-6 rounded-lg text-white">
       {image ? (
         <Image
           src={image}
@@ -81,13 +81,15 @@ export default function ProfileCard({
         </div>
       )}
 
-      <div className="flex-1 space-y-2">
+      <div className="flex-1 space-y-2 items-center">
+        {/* <div className="md:flex md:flex-col md:items-center gap-2"> */}
         <h2 className="text-2xl font-bold">{name || "Unknown User"}</h2>
         <p className="text-gray-400">@{username || "unknown"}</p>
         {bio && <p className="text-gray-300">{bio}</p>}
+        {/* </div> */}
 
 
-<div className="flex gap-6 mt-2">
+<div className="md:flex grid grid-cols-2 md:items-center md:flex-row gap-3 mt-2">
   {twitterUrl && (
     <a
       href={twitterUrl}

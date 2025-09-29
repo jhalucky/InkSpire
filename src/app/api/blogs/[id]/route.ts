@@ -1,5 +1,24 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
+import path from "path";
+import fs from "fs/promises";
+
+async function saveFile(file: File): Promise<string> {
+  const bytes = await file.arrayBuffer();
+  const buffer = Buffer.from(bytes);
+  const uploadDir = path.join(process.cwd(), "public/uploads");
+
+  // ensure uploads folder exists
+  await fs.mkdir(uploadDir, { recursive: true });
+
+  const filename = `${Date.now()}-${file.name}`;
+  const filepath = path.join(uploadDir, filename);
+
+  await fs.writeFile(filepath, buffer);
+
+  // return relative path for DB
+  return `/uploads/${filename}`;
+}
 
 // GET a single blog by id
 export async function GET(req: NextRequest, context: { params: Promise<{ id: string }> }) {
@@ -9,7 +28,7 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
     const blog = await prisma.blog.findUnique({
       where: { id },
       include: {
-        author: { select: { id: true, name: true, username: true, image:true } },
+        author: { select: { id: true, name: true, username: true, image: true } },
         likes: true,
         comments: { include: { author: true } },
       },
@@ -26,17 +45,27 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
   }
 }
 
-// UPDATE a blog (PUT)
+// UPDATE a blog (PUT) with optional file upload
 export async function PUT(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await context.params;
-    const data = await req.json();
+
+    const formData = await req.formData();
+    const title = formData.get("title") as string;
+    const content = formData.get("content") as string;
+    const file = formData.get("coverimage") as File | null;
+
+    let coverimagePath: string | undefined;
+    if (file && file.size > 0) {
+      coverimagePath = await saveFile(file);
+    }
 
     const updatedBlog = await prisma.blog.update({
       where: { id },
       data: {
-        title: data.title,
-        content: data.content,
+        title,
+        content,
+        ...(coverimagePath && { coverimage: coverimagePath }),
       },
     });
 
@@ -62,4 +91,3 @@ export async function DELETE(req: NextRequest, context: { params: Promise<{ id: 
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
-
