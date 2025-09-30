@@ -27,7 +27,7 @@ export default async function RootLayout({
   return (
     <html lang="en" className="h-full">
       <body className={`${inter.className} min-h-screen text-foreground antialiased relative`}>
-        {/* Global unified background */}
+
         <div className="fixed inset-0 -z-10">
           <div className="absolute inset-0 bg-black" />
           <div
