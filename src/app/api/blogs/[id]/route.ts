@@ -58,10 +58,10 @@ export async function GET(
 // UPDATE a blog (PUT) with optional file upload
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await context.params;
 
     const formData = await req.formData();
     const title = formData.get("title") as string;
@@ -92,10 +92,10 @@ export async function PUT(
 // DELETE a blog
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await context.params;
 
     await prisma.blog.delete({
       where: { id },
