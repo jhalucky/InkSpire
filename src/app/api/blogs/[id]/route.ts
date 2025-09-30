@@ -3,14 +3,14 @@ import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 import fs from "fs/promises";
 
-const FALLBACK_IMAGE = "/inkspire.png";
+const FALLBACK_IMAGE = "/public/images/inkspire.png";
 
 async function saveFile(file: File): Promise<string> {
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
   const uploadDir = path.join(process.cwd(), "public/uploads");
 
-  // ensure uploads folder exists
+
   await fs.mkdir(uploadDir, { recursive: true });
 
   const filename = `${Date.now()}-${file.name}`;
@@ -18,7 +18,7 @@ async function saveFile(file: File): Promise<string> {
 
   await fs.writeFile(filepath, buffer);
 
-  // return relative path for DB
+  
   return `/uploads/${filename}`;
 }
 
@@ -43,7 +43,7 @@ export async function GET(
       return NextResponse.json({ error: "Blog not found" }, { status: 404 });
     }
 
-    // fallback cover image if missing
+  
     if (!blog.coverimage) {
       blog.coverimage = FALLBACK_IMAGE;
     }
