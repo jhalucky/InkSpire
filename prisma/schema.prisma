@@ -65,7 +65,8 @@ model Blog {
   title      String
   content    String
   authorId   String
-  coverimage String?  @default("https://cdn-icons-png.flaticon.com/512/1144/1144760.png") 
+  coverimage String?
+
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
   author     User       @relation(fields: [authorId], references: [id], onDelete: Cascade)

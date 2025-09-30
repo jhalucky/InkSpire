@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 import fs from "fs/promises";
 
+const FALLBACK_IMAGE = "/inkspire.png";
+
 async function saveFile(file: File): Promise<string> {
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
@@ -21,9 +23,12 @@ async function saveFile(file: File): Promise<string> {
 }
 
 // GET a single blog by id
-export async function GET(req: NextRequest, context: { params: Promise<{ id: string }> }) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    const { id } = await context.params;
+    const { id } = params;
 
     const blog = await prisma.blog.findUnique({
       where: { id },
@@ -38,6 +43,11 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
       return NextResponse.json({ error: "Blog not found" }, { status: 404 });
     }
 
+    // fallback cover image if missing
+    if (!blog.coverimage) {
+      blog.coverimage = FALLBACK_IMAGE;
+    }
+
     return NextResponse.json(blog);
   } catch (error) {
     console.error("GET blog error:", error);
@@ -46,9 +56,12 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
 }
 
 // UPDATE a blog (PUT) with optional file upload
-export async function PUT(req: NextRequest, context: { params: Promise<{ id: string }> }) {
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    const { id } = await context.params;
+    const { id } = params;
 
     const formData = await req.formData();
     const title = formData.get("title") as string;
@@ -65,7 +78,7 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ id: str
       data: {
         title,
         content,
-        ...(coverimagePath && { coverimage: coverimagePath }),
+        coverimage: coverimagePath || FALLBACK_IMAGE,
       },
     });
 
@@ -77,9 +90,12 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ id: str
 }
 
 // DELETE a blog
-export async function DELETE(req: NextRequest, context: { params: Promise<{ id: string }> }) {
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    const { id } = await context.params;
+    const { id } = params;
 
     await prisma.blog.delete({
       where: { id },
