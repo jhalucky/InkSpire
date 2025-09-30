@@ -25,10 +25,10 @@ async function saveFile(file: File): Promise<string> {
 // GET a single blog by id
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await context.params;
 
     const blog = await prisma.blog.findUnique({
       where: { id },
